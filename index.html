@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="index.js"></script>
+    <link rel="stylesheet" href="styles.css" />
+    <title>Chess</title>
+  </head>
+  <body onload="load()">
+    <div id="info">
+      <span id="turn">White's Turn</span>
+      <div id="captures">
+        <div>
+          <span>White's Captures</span>
+          <div id="w_captures"></div>
+        </div>
+        <div>
+          <span>Black's Captures</span>
+          <div id="b_captures"></div>
+        </div>
+      </div>
+    </div>
+    <div id="wrapper">
+      <div id="board">
+        <div class="row">
+          <div onclick="spotClicked(this)" class="spot" id="spot11"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot12"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot13"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot14"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot15"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot16"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot17"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot18"></div>
+        </div>
+        <div class="row">
+          <div onclick="spotClicked(this)" class="spot" id="spot21"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot22"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot23"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot24"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot25"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot26"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot27"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot28"></div>
+        </div>
+        <div class="row">
+          <div onclick="spotClicked(this)" class="spot" id="spot31"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot32"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot33"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot34"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot35"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot36"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot37"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot38"></div>
+        </div>
+        <div class="row">
+          <div onclick="spotClicked(this)" class="spot" id="spot41"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot42"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot43"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot44"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot45"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot46"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot47"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot48"></div>
+        </div>
+        <div class="row">
+          <div onclick="spotClicked(this)" class="spot" id="spot51"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot52"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot53"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot54"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot55"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot56"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot57"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot58"></div>
+        </div>
+        <div class="row">
+          <div onclick="spotClicked(this)" class="spot" id="spot61"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot62"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot63"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot64"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot65"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot66"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot67"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot68"></div>
+        </div>
+        <div class="row">
+          <div onclick="spotClicked(this)" class="spot" id="spot71"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot72"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot73"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot74"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot75"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot76"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot77"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot78"></div>
+        </div>
+        <div class="row">
+          <div onclick="spotClicked(this)" class="spot" id="spot81"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot82"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot83"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot84"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot85"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot86"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot87"></div>
+          <div onclick="spotClicked(this)" class="spot" id="spot88"></div>
+        </div>
+      </div>
+    </div>
+    <div id="promote">
+      <h3>Promote To:</h3>
+      <div>
+        <img onclick="promoteTo(this)" src="" alt="rook" id="rook" />
+        <img onclick="promoteTo(this)" src="" alt="knight" id="knight" />
+        <img onclick="promoteTo(this)" src="" alt="bishop" id="bishop" />
+        <img onclick="promoteTo(this)" src="" alt="queen" id="queen" />
+      </div>
+    </div>
+  </body>
+</html>

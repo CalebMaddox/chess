@@ -1,0 +1,206 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap');
+* {
+    margin: 0;
+    padding: 0;
+    font-family: "Poppins", sans-serif;
+    font-weight: 600;
+}
+html, body {
+    width: 100%;
+    height: 100%;
+}
+body {
+    display: grid;
+    place-items: center; 
+    overflow: hidden;
+}
+
+#board {
+    border: 2px solid #000;
+    outline: 4px solid #fff;
+    box-shadow: 0px 0px 0px 12px #000;
+    display: grid;
+    grid-template-rows: repeat(8, 1fr);   
+    position: relative;
+}
+#board > .row {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+}
+#board > .row::before {
+    position: absolute;
+    left: calc(-1ch - 15px);
+    top: 50%;
+    transform: translateY(-50%) rotateX(180deg);
+    font-size: 3em;
+    text-align: right;
+}
+/* #region .row numbers */
+#board > .row:nth-child(1):before {
+    content: '1';
+}
+#board > .row:nth-child(2):before {
+    content: '2';
+}
+#board > .row:nth-child(3):before {
+    content: '3';
+}
+#board > .row:nth-child(4):before {
+    content: '4';
+}
+#board > .row:nth-child(5):before {
+    content: '5';
+}
+#board > .row:nth-child(6):before {
+    content: '6';
+}
+#board > .row:nth-child(7):before {
+    content: '7';
+}
+#board > .row:nth-child(8):before {
+    content: '8';
+}
+/* #endregion */
+#board > .row:first-child > .spot::before {
+    position: absolute;
+    bottom: calc(-1.2em - 15px);
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 3em;
+}
+/* #region .spot letters */
+#board > .row:first-child > .spot:nth-child(1)::before {
+    content: "A";
+}
+#board > .row:first-child > .spot:nth-child(2)::before {
+    content: "B";
+}
+#board > .row:first-child > .spot:nth-child(3)::before {
+    content: "C";
+}
+#board > .row:first-child > .spot:nth-child(4)::before {
+    content: "D";
+}
+#board > .row:first-child > .spot:nth-child(5)::before {
+    content: "E";
+}
+#board > .row:first-child > .spot:nth-child(6)::before {
+    content: "F";
+}
+#board > .row:first-child > .spot:nth-child(7)::before {
+    content: "G";
+}
+#board > .row:first-child > .spot:nth-child(8)::before {
+    content: "H";
+}
+#board > .row:first-child > .spot:nth-child(57)::before {
+    content: "A";
+}
+#board > .row:first-child > .spot:nth-child(58)::before {
+    content: "B";
+}
+#board > .row:first-child > .spot:nth-child(59)::before {
+    content: "C";
+}
+#board > .row:first-child > .spot:nth-child(60)::before {
+    content: "D";
+}
+#board > .row:first-child > .spot:nth-child(61)::before {
+    content: "E";
+}
+#board > .row:first-child > .spot:nth-child(62)::before {
+    content: "F";
+}
+#board > .row:first-child > .spot:nth-child(63)::before {
+    content: "G";
+}
+#board > .row:first-child > .spot:nth-child(64)::before {
+    content: "H";
+}
+/* #endregion */
+#board .spot {
+    position: relative;
+    width: 5vw;
+    aspect-ratio: 1;
+    background-color: #222;
+    background-position: center;
+    background-size: 50%;
+    background-repeat: no-repeat;
+    transform: rotateX(180deg);
+}
+#board > .row:nth-child(even) > .spot:nth-child(odd) {
+    background-color: #eee;
+}
+#board > .row:nth-child(odd) > .spot:nth-child(even) {
+    background-color: #eee;
+}
+.dot::after {
+    content: '';
+    background-color: #000000dd;
+    width: 50%;
+    height: 50%;
+    border-radius: 50%;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#info {
+    position: absolute;
+    left: 10vw;
+    transform: translateX(-50%);
+    width: 17.5vw;
+    height: 90vh;
+    border: 2px solid #333;
+    border-radius: 10px;
+    text-align: center;
+}
+#turn {
+    font-size: 1.5em;
+    height: 1.5em;
+    margin-bottom: 5vh;
+    display: block;
+    position: relative;
+}
+#turn::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: #333;
+}
+#captures {
+    height: calc(85vh - 1.5em);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+}
+#captures > div {
+    height: 100%;
+}
+
+#promote {
+    display: none;
+    position: absolute;
+    right: 10vw;
+    transform: translateX(50%);
+    width: 17.5vw;
+    height: 10vh;
+    border: 2px solid #333;
+    border-radius: 10px;
+    text-align: center;
+}
+#promote > div {
+    display: flex;
+    flex-direction: row;
+    padding: 1vw;
+    justify-content: space-evenly;
+    align-items: center;
+}
+#promote > div > img {
+    height: 4vh;
+}

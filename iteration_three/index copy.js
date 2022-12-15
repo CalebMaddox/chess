@@ -25,7 +25,13 @@ window.addEventListener("load", function () {
   document.querySelector("head").appendChild(favicon);
 
   // puts pieces in their respective spots
-  refreshBoard(spots);
+  for (i = 0; i < spots.length; i++) {
+    if (spots[i].piece != "") {
+      document.getElementById(
+        `spot${spots[i].pos}`
+      ).style.backgroundImage = `url(assets/${spots[i].piece}.png)`;
+    }
+  }
 });
 
 function spotClicked(element) {
@@ -69,8 +75,6 @@ function movePiece(from, to) {
   let refresh = [to.pos, from.pos]; // used to refresh any extra spaces, other than from and to
   let highlight = []; // allows to highlight any extra spaces, other than from and to
   let check = false;
-  let ambiguity = [];
-  let disambiguity = ""; // used to build prefix used to disambiguify moves
 
   // #region dealing with special cases
   // using en passant
@@ -145,28 +149,6 @@ function movePiece(from, to) {
       special = "castle short";
     }
   }
-  // pawn promotion
-  if (from.piece == "w_pawn" && to.pos.substring(0, 1) == 8) {
-    // white pawn promotion
-    console.log("white pawn promotion");
-  } else if (from.piece == "b_pawn" && to.pos.substring(0, 1) == 1) {
-    // black pawn promotion
-    console.log("black pawn promotion");
-  }
-  // dealing with ambiguity
-  if (from.piece.substring(2) != "pawn") {
-    ambiguity = checkAmbiguity(from.pos, to.pos, from.piece); // returns [ambiguous (boolean), file ambiguity (boolean), rank ambiguity (boolean)]
-    if (ambiguity[0]) {
-      if (!ambiguity[1]) {
-        disambiguity = numberToLetter(from.pos.substring(1, 2));
-      } else if (!ambiguity[2]) {
-        disambiguity = from.pos.substring(0, 1);
-      } else {
-        disambiguity =
-          numberToLetter(from.pos.substring(1, 2)) + from.pos.substring(0, 1);
-      }
-    }
-  }
   // #endregion dealing with special cases
 
   // adds piece captured to display for captured pieces
@@ -195,7 +177,6 @@ function movePiece(from, to) {
     }
   }
 
-  // removes possiblities of castling based on spot that piece was on. (even if another piece happens to be on that spot, this means that the rook/king has already been moved, so setting the variable to false again will not create any problems)
   switch (from.pos) {
     case "81":
       b_castleLong = false;
@@ -230,21 +211,12 @@ function movePiece(from, to) {
     checks = check__forChecks("w");
   }
   if (checks[0]) check = true;
-  let move = recordMove(
-    from.pos,
-    to.pos,
-    to.piece,
-    capture,
-    special,
-    check,
-    disambiguity
-  );
+  let move = recordMove(from.pos, to.pos, to.piece, capture, special, check);
   addToHistory(move);
   switchPlayer();
 }
 
 function check__canMove(clickedSpot) {
-  // just checks if the spot has a dot on it. Dots are set on select, so they should be same as any possible moves
   let result = false;
   if (dots.find((x) => x == clickedSpot.pos) != undefined) result = true;
   return result;
@@ -272,14 +244,15 @@ function check__forMoves(code, piece, checkChecks) {
       break;
   }
 
-  // checks if piece is gone, will king be in check. If not, don't check for checks in runPatterns (there is no way in chess for a piece to force a check upon the player if it can be removed and not cause a discovered check)
-  if (
-    checkChecks &&
-    spots.find((x) => x.pos == spot.pos).piece.substring(2) != "king"
-  ) {
-    spots.find((x) => x.pos == spot.pos).piece = "";
-    checkChecks = check__forChecks(currentPlayer)[0];
-    spots.find((x) => x.pos == spot.pos).piece = `${piece[0]}_${piece[1]}`;
+  // checks if piece is gone, will king be in check. If not, don't check for checks in runPatterns
+  if (checkChecks) {
+    if (piece[1] == "king") {
+      checkChecks = false;
+    } else {
+      spots.find((x) => x.pos == spot.pos).piece = "";
+      checkChecks = check__forChecks(currentPlayer)[0];
+      spots.find((x) => x.pos == spot.pos).piece = `${piece[0]}_${piece[1]}`;
+    }
   }
 
   // sets patterns based on piece
@@ -316,7 +289,6 @@ function runPatterns(patterns, currentSpot, player, checkChecks) {
   // initializing and/or setting variables
   let x = currentSpot.toString().slice("")[1];
   let y = currentSpot.toString().slice("")[0];
-  let piece = spots.find((k) => k.pos == currentSpot).piece;
   // variables that will be set/changed later in function
   let cont = true; // short for continue, allows function to handle "+" and "-" patterns
   let x_change;
@@ -324,11 +296,9 @@ function runPatterns(patterns, currentSpot, player, checkChecks) {
   let x_out;
   let y_out;
   let conditions;
-  let possibilities = []; // possible outputs (before checking for checks) is built on this
-  let final = []; // output is built on this variable
+  let possibilities = []; // output is built on this variable
   let passed = true; // allows conditions to prevent output possibility
 
-  // running through all possible patterns for given piece
   for (i = 0; i < patterns.length; i++) {
     // resetting variables to defaults
     passed = true;
@@ -346,9 +316,11 @@ function runPatterns(patterns, currentSpot, player, checkChecks) {
             if (out.piece.substring(0, 1) == player) {
               break;
             } else if (out.piece == "") {
-              possibilities.push(`${out.pos}`);
+              if (bypassPassedCheckChecks(checkChecks, x, y, out, player))
+                possibilities.push(`${out.pos}`);
             } else {
-              possibilities.push(`${out.pos}`);
+              if (bypassPassedCheckChecks(checkChecks, x, y, out, player))
+                possibilities.push(`${out.pos}`);
               break;
             }
           }
@@ -364,9 +336,11 @@ function runPatterns(patterns, currentSpot, player, checkChecks) {
             if (out.piece.substring(0, 1) == player) {
               break;
             } else if (out.piece == "") {
-              possibilities.push(`${out.pos}`);
+              if (bypassPassedCheckChecks(checkChecks, x, y, out, player))
+                possibilities.push(`${out.pos}`);
             } else {
-              possibilities.push(`${out.pos}`);
+              if (bypassPassedCheckChecks(checkChecks, x, y, out, player))
+                possibilities.push(`${out.pos}`);
               break;
             }
           }
@@ -382,9 +356,11 @@ function runPatterns(patterns, currentSpot, player, checkChecks) {
             if (out.piece.substring(0, 1) == player) {
               break;
             } else if (out.piece == "") {
-              possibilities.push(`${out.pos}`);
+              if (bypassPassedCheckChecks(checkChecks, x, y, out, player))
+                possibilities.push(`${out.pos}`);
             } else {
-              possibilities.push(`${out.pos}`);
+              if (bypassPassedCheckChecks(checkChecks, x, y, out, player))
+                possibilities.push(`${out.pos}`);
               break;
             }
           }
@@ -400,9 +376,11 @@ function runPatterns(patterns, currentSpot, player, checkChecks) {
             if (out.piece.substring(0, 1) == player) {
               break;
             } else if (out.piece == "") {
-              possibilities.push(`${out.pos}`);
+              if (bypassPassedCheckChecks(checkChecks, x, y, out, player))
+                possibilities.push(`${out.pos}`);
             } else {
-              possibilities.push(`${out.pos}`);
+              if (bypassPassedCheckChecks(checkChecks, x, y, out, player))
+                possibilities.push(`${out.pos}`);
               break;
             }
           }
@@ -411,7 +389,6 @@ function runPatterns(patterns, currentSpot, player, checkChecks) {
         break;
     }
 
-    // makes sure special case ("+" or "-") on both x and y has not been previously used
     if (cont) {
       // get data and set to variables
       x_change = patterns[i].pattern.split(" ")[0];
@@ -426,9 +403,11 @@ function runPatterns(patterns, currentSpot, player, checkChecks) {
             if (out.piece.substring(0, 1) == player) {
               break;
             } else if (out.piece == "") {
-              possibilities.push(`${out.pos}`);
+              if (bypassPassedCheckChecks(checkChecks, x, y, out, player))
+                possibilities.push(`${out.pos}`);
             } else {
-              possibilities.push(`${out.pos}`);
+              if (bypassPassedCheckChecks(checkChecks, x, y, out, player))
+                possibilities.push(`${out.pos}`);
               break;
             }
           }
@@ -440,15 +419,15 @@ function runPatterns(patterns, currentSpot, player, checkChecks) {
             if (out.piece.substring(0, 1) == player) {
               break;
             } else if (out.piece == "") {
-              possibilities.push(`${out.pos}`);
+              if (bypassPassedCheckChecks(checkChecks, x, y, out, player))
+                possibilities.push(`${out.pos}`);
             } else {
-              possibilities.push(`${out.pos}`);
+              if (bypassPassedCheckChecks(checkChecks, x, y, out, player))
+                possibilities.push(`${out.pos}`);
               break;
             }
           }
       }
-
-      // makes sure special case for x only has not been used
       if (cont) {
         switch (y_change) {
           case "+":
@@ -457,10 +436,11 @@ function runPatterns(patterns, currentSpot, player, checkChecks) {
               if (out.piece.substring(0, 1) == player) {
                 break;
               } else if (out.piece == "") {
-                possibilities.push(`${out.pos}`);
+                if (bypassPassedCheckChecks(checkChecks, x, y, out, player))
+                  possibilities.push(`${out.pos}`);
               } else {
-                possibilities.push(`${out.pos}`);
-                break;
+                if (bypassPassedCheckChecks(checkChecks, x, y, out, player))
+                  possibilities.push(`${out.pos}`);
               }
             }
             cont = false;
@@ -471,10 +451,11 @@ function runPatterns(patterns, currentSpot, player, checkChecks) {
               if (out.piece.substring(0, 1) == player) {
                 break;
               } else if (out.piece == "") {
-                possibilities.push(`${out.pos}`);
+                if (bypassPassedCheckChecks(checkChecks, x, y, out, player))
+                  possibilities.push(`${out.pos}`);
               } else {
-                possibilities.push(`${out.pos}`);
-                break;
+                if (bypassPassedCheckChecks(checkChecks, x, y, out, player))
+                  possibilities.push(`${out.pos}`);
               }
             }
             cont = false;
@@ -482,7 +463,6 @@ function runPatterns(patterns, currentSpot, player, checkChecks) {
         }
       }
 
-      // makes sure special case ("+" or "-") has not been previously used
       if (cont) {
         x_out = parseInt(x) + parseInt(x_change);
         y_out = parseInt(y) + parseInt(y_change);
@@ -559,46 +539,27 @@ function runPatterns(patterns, currentSpot, player, checkChecks) {
           )
             passed = false;
 
-          // pushes possibility into possibilities variable
+          // if checks must be checked, see if move would put player into check
+          if (checkChecks) {
+            passed = testMoveForChecks(x, y, x_out, y_out, player);
+          }
+
+          // pushes possibility into output variable
           if (passed) possibilities.push(`${y_out}${x_out}`);
         }
       }
     }
   }
 
-  // if checks must be checked, see if move would put player into check
-  if (checkChecks) {
-    for (g = 0; g < possibilities.length; g++) {
-      if (
-        testMoveForChecks(
-          x,
-          y,
-          possibilities[g].substring(1, 2),
-          possibilities[g].substring(0, 1),
-          player,
-          piece
-        )
-      ) {
-        final.push(possibilities[g]);
-      }
-    }
-  } else {
-    // if checks mustn't be checked, return any possible moves (without regard to illegal moves due to self-imposed checks)
-    return possibilities;
-  }
-
   // returns possible moves to be used however necessary
-  return final;
+  return possibilities;
 }
 
 function removeHightlights(keep) {
-  // gets highlights using .getElementsByClassName, as discrepencies don't matter between JS and HTML (highlights serve no technical purpose)
   let highlights = document.getElementsByClassName("highlight");
   for (i = highlights.length - 1; i >= 0; i--) {
     highlights[i].classList.remove("highlight");
   }
-
-  // "keep" variable allows for code to keep certain spots highlighted (ex: previous move and all spots utilized in it should stay highlighted, even when opponent selects a piece)
   if (keep == []) return;
   for (i = keep.length - 1; i >= 0; i--) {
     document.getElementById(`spot${keep[i]}`).classList.add("highlight");
@@ -606,7 +567,6 @@ function removeHightlights(keep) {
 }
 
 function addDots(spots) {
-  // goes through array of spots that should have dots, adds them to local variable, then to HTML as classes
   for (i = 0; i < spots.length; i++) {
     dots.push(spots[i]);
     document.getElementById(`spot${spots[i]}`).classList.add("dot");
@@ -614,16 +574,13 @@ function addDots(spots) {
 }
 
 function removeDots() {
-  // removes dots from actual display (styled by css, utilizing classes)
   for (i = 0; i < dots.length; i++) {
     document.getElementById(`spot${dots[i]}`).classList.remove("dot");
   }
-  // removes dots from local JavaScript variable (used in order to prevent discrepencies between HTML and JS from messing up gameplay, though it may mess up the display)
   dots = [];
 }
 
 function switchPlayer() {
-  // if you don't understand what this is doing, then please go take a course on JavaScript
   if (currentPlayer == "w") {
     currentPlayer = "b";
     document.getElementById("turn").innerText = "Black's Move";
@@ -633,17 +590,12 @@ function switchPlayer() {
   }
 }
 
-function recordMove(from, to, piece, capture, special, isCheck, disambiguity) {
-  // initializing and setting extra variables
+function recordMove(from, to, piece, capture, special, isCheck) {
   let move = "";
   let player = piece.substring(0, 1);
   let skip = false;
-  // sets piece to only the actual piece, not including "w_" or "b_"
   piece = piece.substring(2);
 
-  // checks for any special cases that would be represented differently. These include:
-  //  - castle (long or short)
-  //  - en passant
   switch (special) {
     case "castle long":
       move = "0-0-0";
@@ -680,27 +632,22 @@ function recordMove(from, to, piece, capture, special, isCheck, disambiguity) {
       }
     }
 
-    let toNot = numberToLetter(to.substring(1, 2)) + to.substring(0, 1); // toNot = toNotation
-    if (capture) move = disambiguity + piece + "x" + toNot;
-    if (!capture) move = disambiguity + piece + toNot;
+    let toNot = numberToLetter(to.substring(1, 2)) + to.substring(0, 1);
+    if (capture) move = piece + "x" + toNot;
+    if (!capture) move = piece + toNot;
   }
 
-  // adds + to end of move if it puts other player into check
   if (isCheck) move += "+";
 
-  // if the position after the move is played should be stored,
   if (recordPos) {
     let currentPos = [];
     for (i = 0; i < spots.length; i++) {
-      // for every position, remove if the piece is not there (allows for significantly less storage necessity)
       if (spots[i].piece != "") {
         currentPos.push(spots[i]);
       }
     }
-    // push move, with position after move
     moveHistory.push({ player: player, move: move, curPos: currentPos });
   } else {
-    // push move, without position after move
     moveHistory.push({ player: player, move: move });
   }
 
@@ -708,13 +655,11 @@ function recordMove(from, to, piece, capture, special, isCheck, disambiguity) {
 }
 
 function addToHistory(move) {
-  // if the player is white, then add a number to be displayed on hover, indicating the number of moves each player would be on on that respective move
   if (move.player == "w") {
     document.getElementById("move_num").innerHTML += `<span>${Math.ceil(
       moveHistory.length / 2
     )}</span>`;
   }
-  // no matter who the player is, add the move's shorthand to the movelist (no table is necessary, using "display: grid" in css)
   document.getElementById("move_list").innerHTML += `<span>${move.move}</span>`;
 }
 
@@ -724,7 +669,6 @@ function check__forChecks(player) {
   let checks = [];
   let opponent;
   let kingMoves = [];
-  // set opponent to the other player
   if (player == "w") {
     opponent = "b";
   } else {
@@ -733,107 +677,48 @@ function check__forChecks(player) {
 
   // running through pieces and their respective possible moves
   for (k = 0; k < pieces.length; k++) {
-    // checks moves that a piece of every kind could make if in place of the king
     kingMoves = check__forMoves(kingPos, `${player}_${pieces[k]}`, false);
-
-    // if it has possible moves, check every move
     if (kingMoves.length > 0) {
       for (j = 0; j < kingMoves.length; j++) {
-        // if any of the possible moves would capture the opponent's piece of the same kind as being checked, then that piece at that position could take the king
         if (
           spots.find((x) => x.pos == kingMoves[j]).piece ==
           `${opponent}_${pieces[k]}`
         )
-          // if this is true, push the check's position and piece causing check to variable
           checks.push({ at: kingMoves[j], piece: pieces[k] });
       }
     }
   }
 
-  // return (1) whether or not there are any checks and (2) the array of all checks, their positions, and pieces
   return [checks.length > 0, checks];
 }
 
-function testMoveForChecks(
-  x_before,
-  y_before,
-  x_after,
-  y_after,
-  player,
-  piece
-) {
-  // sets pieces to a certain variable so that it can be placed back afterwards
+function testMoveForChecks(x_before, y_before, x_after, y_after, player) {
   let inPiece = spots.find((k) => k.pos == `${y_before}${x_before}`).piece;
   let outPiece = spots.find((k) => k.pos == `${y_after}${x_after}`).piece;
-
-  // removes piece from spot "from" and places piece in spot "to"
   spots.find((k) => k.pos == `${y_before}${x_before}`).piece = "";
-  spots.find((k) => k.pos == `${y_after}${x_after}`).piece = piece;
-
-  // checks for checks with move made
+  spots.find((k) => k.pos == `${y_after}${x_after}`).piece = `${player}_pawn`;
   let passed = !check__forChecks(player)[0];
-
-  // puts pieces back in their respective spots
   spots.find((k) => k.pos == `${y_before}${x_before}`).piece = inPiece;
   spots.find((k) => k.pos == `${y_after}${x_after}`).piece = outPiece;
-
-  // returns whether or not the possibility should be passed (the opposite of whether or not it would cause a check)
   return passed;
 }
 
-function refreshBoard(boardCondition) {
-  for (i = 0; i < boardCondition.length; i++) {
-    if (boardCondition[i].piece != "") {
-      document.getElementById(
-        `spot${boardCondition[i].pos}`
-      ).style.backgroundImage = `url(assets/${boardCondition[i].piece}.png)`;
-    }
-  }
-}
-
-function checkAmbiguity(from, to, piece) {
-  from = spots.find((g) => g.pos == from);
-  to = spots.find((g) => g.pos == to);
-
-  let toPiece = to.piece;
-  let opponent;
-  let ambiguousSpots = [];
-  let y_ambiguous = false;
-  let x_ambiguous = false;
-
-  if (currentPlayer == "w") {
-    opponent = "b";
+function bypassPassedCheckChecks(checkChecks, x, y, out, player) {
+  if (
+    checkChecks &&
+    testMoveForChecks(
+      x,
+      y,
+      out.pos.substring(1, 2),
+      out.pos.substring(0, 1),
+      player
+    )
+  ) {
+    return true;
   } else {
-    opponent = "w";
-  }
-
-  from.piece = "";
-  to.piece = `${opponent}_${piece.substring(2)}`;
-  let movePoss = check__forMoves(
-    to,
-    `${opponent}_${piece.substring(2)}`,
-    false
-  );
-  for (g = 0; g < movePoss.length; g++) {
-    if (spots.find((n) => n.pos == movePoss[g]).piece == piece) {
-      ambiguousSpots.push(movePoss[g]);
+    if (!checkChecks) {
+      return true;
     }
   }
-
-  from.piece = piece;
-  to.piece = toPiece;
-
-  if (ambiguousSpots.length == 0) {
-    return [false];
-  } else {
-    for (g = 0; g < ambiguousSpots.length; g++) {
-      if (ambiguousSpots[g].substring(0, 1) == from.pos.substring(0, 1)) {
-        y_ambiguous = true;
-      }
-      if (ambiguousSpots[g].substring(1, 2) == from.pos.substring(1, 2)) {
-        x_ambiguous = true;
-      }
-    }
-    return [ambiguousSpots.length > 0, x_ambiguous, y_ambiguous];
-  }
+  return false;
 }

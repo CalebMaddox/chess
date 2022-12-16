@@ -11,6 +11,8 @@ var b_castleLong = true;
 var b_castleShort = true;
 var keepHighlight = [];
 var moveHistory = [];
+var promoteMoveStore = []; // stored information for when pawn is promoting
+var paused = false; // set to true when player input is needed before any other move should be made (pawn promotion)
 
 // runs on page load
 window.addEventListener("load", function () {
@@ -29,6 +31,7 @@ window.addEventListener("load", function () {
 });
 
 function spotClicked(element) {
+  if (paused) return;
   // initializing and/or setting variables
   pos = element.id.substr(4, 2);
   let clicked = spots.find((x) => x.pos == pos);
@@ -147,11 +150,29 @@ function movePiece(from, to) {
   }
   // pawn promotion
   if (from.piece == "w_pawn" && to.pos.substring(0, 1) == 8) {
-    // white pawn promotion
-    console.log("white pawn promotion");
+    promotion("w", to.pos, to, from);
+    promoteMoveStore = [
+      from.pos,
+      to.pos,
+      to.piece,
+      capture,
+      special,
+      check,
+      disambiguity,
+    ];
+    return;
   } else if (from.piece == "b_pawn" && to.pos.substring(0, 1) == 1) {
-    // black pawn promotion
-    console.log("black pawn promotion");
+    promotion("b", to.pos, to, from);
+    promoteMoveStore = [
+      from.pos,
+      to.pos,
+      to.piece,
+      capture,
+      special,
+      check,
+      disambiguity,
+    ];
+    return;
   }
   // dealing with ambiguity
   if (from.piece.substring(2) != "pawn") {
@@ -183,17 +204,7 @@ function movePiece(from, to) {
   from.piece = "";
 
   // refreshes display, essentially
-  for (i = 0; i < refresh.length; i++) {
-    if (spots.find((x) => x.pos == refresh[i]).piece == "") {
-      document.getElementById(`spot${refresh[i]}`).style.backgroundImage = "";
-    } else {
-      document.getElementById(
-        `spot${refresh[i]}`
-      ).style.backgroundImage = `url(assets/${
-        spots.find((x) => x.pos == refresh[i]).piece
-      }.png`;
-    }
-  }
+  refreshBoard(spots);
 
   // removes possiblities of castling based on spot that piece was on. (even if another piece happens to be on that spot, this means that the rook/king has already been moved, so setting the variable to false again will not create any problems)
   switch (from.pos) {
@@ -638,6 +649,7 @@ function recordMove(from, to, piece, capture, special, isCheck, disambiguity) {
   let move = "";
   let player = piece.substring(0, 1);
   let skip = false;
+  let suffix = "";
   // sets piece to only the actual piece, not including "w_" or "b_"
   piece = piece.substring(2);
 
@@ -655,6 +667,19 @@ function recordMove(from, to, piece, capture, special, isCheck, disambiguity) {
       break;
     case "en passant":
       capture = true;
+      break;
+    case "promote":
+      let promotedTo;
+      switch (piece) {
+        case "knight":
+          promotedTo = "N";
+          break;
+        default:
+          promotedTo = piece.substring(0, 1).toUpperCase();
+          break;
+      }
+      suffix = promotedTo;
+      piece = "pawn";
       break;
   }
 
@@ -681,8 +706,8 @@ function recordMove(from, to, piece, capture, special, isCheck, disambiguity) {
     }
 
     let toNot = numberToLetter(to.substring(1, 2)) + to.substring(0, 1); // toNot = toNotation
-    if (capture) move = disambiguity + piece + "x" + toNot;
-    if (!capture) move = disambiguity + piece + toNot;
+    if (capture) move = disambiguity + piece + "x" + toNot + suffix;
+    if (!capture) move = disambiguity + piece + toNot + suffix;
   }
 
   // adds + to end of move if it puts other player into check
@@ -708,6 +733,7 @@ function recordMove(from, to, piece, capture, special, isCheck, disambiguity) {
 }
 
 function addToHistory(move) {
+  console.log(move);
   // if the player is white, then add a number to be displayed on hover, indicating the number of moves each player would be on on that respective move
   if (move.player == "w") {
     document.getElementById("move_num").innerHTML += `<span>${Math.ceil(
@@ -783,7 +809,11 @@ function testMoveForChecks(
 
 function refreshBoard(boardCondition) {
   for (i = 0; i < boardCondition.length; i++) {
-    if (boardCondition[i].piece != "") {
+    if (boardCondition[i].piece == "") {
+      document.getElementById(
+        `spot${boardCondition[i].pos}`
+      ).style.backgroundImage = "";
+    } else {
       document.getElementById(
         `spot${boardCondition[i].pos}`
       ).style.backgroundImage = `url(assets/${boardCondition[i].piece}.png)`;
@@ -836,4 +866,84 @@ function checkAmbiguity(from, to, piece) {
     }
     return [ambiguousSpots.length > 0, x_ambiguous, y_ambiguous];
   }
+}
+
+function promotion(player, spot, to, from) {
+  // styling promotion choice plaque
+  paused = true;
+  let el = document.getElementById(`spot${spot}`);
+  let elementProps = el.getBoundingClientRect();
+  let position = [elementProps.left, elementProps.top];
+  let size = [elementProps.width, elementProps.height * 4];
+  let promoteEl = document.getElementById("promote");
+  let children = promoteEl.children;
+  children[0].src = `assets/${player}_queen.png`;
+  children[1].src = `assets/${player}_rook.png`;
+  children[2].src = `assets/${player}_knight.png`;
+  children[3].src = `assets/${player}_bishop.png`;
+  promoteEl.style.left = `${position[0]}px`;
+  if (player == "b") {
+    position[1] = position[1] - size[1] * 0.75;
+  }
+  promoteEl.style.top = `${position[1]}px`;
+  promoteEl.style.width = `${size[0]}px`;
+  promoteEl.style.height = `${size[1]}px`;
+  promoteEl.style.display = "grid";
+  setTimeout(() => {
+    promoteEl.style.opacity = "1";
+  }, 1);
+
+  // changing highlights
+  keepHighlight = [to.pos, from.pos];
+  removeHightlights(keepHighlight);
+}
+
+function promotePiece(piece) {
+  let from = spots.find((x) => x.pos == promoteMoveStore[0]);
+  let to = spots.find((x) => x.pos == promoteMoveStore[1]);
+  let capture = promoteMoveStore[3];
+  let special = "promote";
+  let check = false;
+  let disambiguity = "";
+
+  // adds piece captured to display for captured pieces
+  if (to.piece != "") {
+    document.getElementById(
+      `${currentPlayer}_captures`
+    ).innerHTML += `<img src="assets/${
+      to.piece
+    }.png" alt="capture - ${to.piece.substring(2)}">`;
+  }
+
+  // moves "from" piece to "to" spot
+  to.piece = `${currentPlayer}_${piece}`;
+  from.piece = "";
+
+  // refreshes display, essentially
+  refreshBoard(spots);
+
+  keepHighlight = [to.pos, from.pos];
+  removeHightlights(keepHighlight);
+  let checks = [];
+  if (currentPlayer == "w") {
+    checks = check__forChecks("b");
+  } else {
+    checks = check__forChecks("w");
+  }
+  if (checks[0]) check = true;
+  let move = recordMove(
+    from.pos,
+    to.pos,
+    `${currentPlayer}_${piece}`,
+    capture,
+    special,
+    check,
+    disambiguity
+  );
+  addToHistory(move);
+  switchPlayer();
+
+  document.getElementById("promote").style.display = "none";
+
+  paused = false;
 }

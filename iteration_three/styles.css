@@ -286,7 +286,7 @@ mark {
   text-align: center;
   place-items: center;
   transition: opacity 0.4s ease, width 0.4s ease 0.25s, height 0.4s ease 0.25s,
-    inset 0.4s ease, transform 0.4s ease, border-radius 0.4s ease;
+    inset 0.4s ease, transform 0.4s ease, border-radius 0.2s ease;
 }
 #modal * {
   display: auto;

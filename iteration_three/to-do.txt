@@ -1,3 +1,6 @@
-- pawn promotion
-- checkmate detection
-- forced draw detection (player can't make any legal move)
+- organize captures?
+- copy game file in different formats
+- use some outside source to find more info on position?
+- find best moves in position when reviewing
+- get bot to play/make bot to play/find open source bot lol
+- playable online??????????

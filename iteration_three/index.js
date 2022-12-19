@@ -1,4 +1,3 @@
-const recordPos = true; // determines whether positions are recorded with moves
 var pos;
 var dots = [];
 var currentPlayer = "w";
@@ -11,8 +10,11 @@ var b_castleLong = true;
 var b_castleShort = true;
 var keepHighlight = [];
 var moveHistory = [];
+var values = { w_value: 39, b_value: 39 };
 var promoteMoveStore = []; // stored information for when pawn is promoting
 var paused = false; // set to true when player input is needed before any other move should be made (pawn promotion)
+var stage; // used to indicate what stage the game is in (playing, review, etc.)
+var moveReviewing = 0; // indicates which move is being reviewed (allows for "next move" and "previous move" buttons)
 
 // runs on page load
 window.addEventListener("load", function () {
@@ -28,10 +30,27 @@ window.addEventListener("load", function () {
 
   // puts pieces in their respective spots
   refreshBoard(spots);
+
+  // displays value difference (should start as 0 to 0, but may not if spots is changed)
+  let difference = values.w_value - values.b_value;
+  let w_valueEl = document.getElementById("w_value");
+  let b_valueEl = document.getElementById("b_value");
+  if (difference > 0) {
+    w_valueEl.innerText = "+" + difference;
+    b_valueEl.innerText = "-" + difference;
+  } else if (difference < 0) {
+    w_valueEl.innerText = "-" + difference;
+    b_valueEl.innerText = "+" + difference;
+  } else {
+    w_valueEl.innerText = difference;
+    b_valueEl.innerText = difference;
+  }
+
+  stage = "playing";
 });
 
 function spotClicked(element) {
-  if (paused) return;
+  if (paused || stage != "playing") return;
   // initializing and/or setting variables
   pos = element.id.substr(4, 2);
   let clicked = spots.find((x) => x.pos == pos);
@@ -241,6 +260,31 @@ function movePiece(from, to) {
     checks = check__forChecks("w");
   }
   if (checks[0]) check = true;
+  if (check) {
+    if (currentPlayer == "w") {
+      if (check__forNoMoves("b")) {
+        endGame("White Wins,checkmate");
+        special = "checkmate";
+      }
+    } else {
+      if (check__forNoMoves("w")) {
+        endGame("Black Wins,checkmate");
+        special = "checkmate";
+      }
+    }
+  } else {
+    if (currentPlayer == "w") {
+      if (check__forNoMoves("b")) {
+        endGame("Tie,stalemate");
+        special = "stalmate";
+      }
+    } else {
+      if (check__forNoMoves("w")) {
+        endGame("Tie,stalemate");
+        special = "stalmate";
+      }
+    }
+  }
   let move = recordMove(
     from.pos,
     to.pos,
@@ -251,6 +295,7 @@ function movePiece(from, to) {
     disambiguity
   );
   addToHistory(move);
+
   switchPlayer();
 }
 
@@ -261,11 +306,11 @@ function check__canMove(clickedSpot) {
   return result;
 }
 
-function check__forMoves(code, piece, checkChecks) {
+function check__forMoves(code, piece, checkChecks, checkingForNoMoves) {
   // "code" shows which piece is being checked
   // Options include:
   //  - selected (piece not necessary in this case)
-  //  - input a spot
+  //  - input a spot (piece must still be defined)
 
   // initializing and/or setting variables
   let spot;
@@ -285,6 +330,7 @@ function check__forMoves(code, piece, checkChecks) {
 
   // checks if piece is gone, will king be in check. If not, don't check for checks in runPatterns (there is no way in chess for a piece to force a check upon the player if it can be removed and not cause a discovered check)
   if (
+    !checkingForNoMoves &&
     checkChecks &&
     spots.find((x) => x.pos == spot.pos).piece.substring(2) != "king"
   ) {
@@ -541,6 +587,7 @@ function runPatterns(patterns, currentSpot, player, checkChecks) {
                 }
                 break;
               default:
+                // some command relating to a certain piece (used most for castling)
                 if (conditions[j] == "") break;
                 if (conditions[j].indexOf(" ") == -1) break;
                 let command = conditions[j].split(" ")[0];
@@ -556,6 +603,14 @@ function runPatterns(patterns, currentSpot, player, checkChecks) {
                   }
                 } else if (command == "empty") {
                   if (spots.find((x) => x.pos == coord).piece != "") {
+                    passed = false;
+                  }
+                } else {
+                  // certain piece must be on this spot
+                  if (
+                    spots.find((x) => x.pos == coord).piece !=
+                    `${player}_${command}`
+                  ) {
                     passed = false;
                   }
                 }
@@ -650,6 +705,8 @@ function recordMove(from, to, piece, capture, special, isCheck, disambiguity) {
   let player = piece.substring(0, 1);
   let skip = false;
   let suffix = "";
+  let currentPos = [];
+  let highlights = [];
   // sets piece to only the actual piece, not including "w_" or "b_"
   piece = piece.substring(2);
 
@@ -681,6 +738,8 @@ function recordMove(from, to, piece, capture, special, isCheck, disambiguity) {
       suffix = promotedTo;
       piece = "pawn";
       break;
+    case "checkmate":
+      suffix = "+";
   }
 
   if (!skip) {
@@ -710,30 +769,49 @@ function recordMove(from, to, piece, capture, special, isCheck, disambiguity) {
     if (!capture) move = disambiguity + piece + toNot + suffix;
   }
 
+  // calculates the piece values if a piece is captured
+  if (capture || special == "promote") values = calcPieceValue(spots);
+  let difference = values.w_value - values.b_value;
+  let w_valueEl = document.getElementById("w_value");
+  let b_valueEl = document.getElementById("b_value");
+  if (difference > 0) {
+    w_valueEl.innerText = "+" + Math.abs(difference);
+    b_valueEl.innerText = "-" + Math.abs(difference);
+  } else if (difference < 0) {
+    w_valueEl.innerText = "-" + Math.abs(difference);
+    b_valueEl.innerText = "+" + Math.abs(difference);
+  } else {
+    w_valueEl.innerText = Math.abs(difference);
+    b_valueEl.innerText = Math.abs(difference);
+  }
+
   // adds + to end of move if it puts other player into check
   if (isCheck) move += "+";
 
-  // if the position after the move is played should be stored,
-  if (recordPos) {
-    let currentPos = [];
-    for (i = 0; i < spots.length; i++) {
-      // for every position, remove if the piece is not there (allows for significantly less storage necessity)
-      if (spots[i].piece != "") {
-        currentPos.push(spots[i]);
-      }
-    }
-    // push move, with position after move
-    moveHistory.push({ player: player, move: move, curPos: currentPos });
-  } else {
-    // push move, without position after move
-    moveHistory.push({ player: player, move: move });
+  // gets all highlighted spots to be shown when reviewing game
+  for (i = 0; i < keepHighlight.length; i++) {
+    highlights.push(keepHighlight[i]);
   }
+
+  // if the position after the move is played should be stored,
+  for (i = 0; i < spots.length; i++) {
+    // for every position, remove if the piece is not there (allows for significantly less storage necessity)
+    if (spots[i].piece != "") {
+      currentPos.push({ pos: `${spots[i].pos}`, piece: `${spots[i].piece}` });
+    }
+  }
+  // push move, with position after move
+  moveHistory.push({
+    player: player,
+    move: move,
+    highlighted: highlights,
+    curPos: currentPos,
+  });
 
   return moveHistory[moveHistory.length - 1];
 }
 
 function addToHistory(move) {
-  console.log(move);
   // if the player is white, then add a number to be displayed on hover, indicating the number of moves each player would be on on that respective move
   if (move.player == "w") {
     document.getElementById("move_num").innerHTML += `<span>${Math.ceil(
@@ -741,7 +819,11 @@ function addToHistory(move) {
     )}</span>`;
   }
   // no matter who the player is, add the move's shorthand to the movelist (no table is necessary, using "display: grid" in css)
-  document.getElementById("move_list").innerHTML += `<span>${move.move}</span>`;
+  document.getElementById(
+    "move_list"
+  ).innerHTML += `<span onclick="reviewMove(${moveHistory.length - 1}, this)">${
+    move.move
+  }</span>`;
 }
 
 function check__forChecks(player) {
@@ -760,7 +842,7 @@ function check__forChecks(player) {
   // running through pieces and their respective possible moves
   for (k = 0; k < pieces.length; k++) {
     // checks moves that a piece of every kind could make if in place of the king
-    kingMoves = check__forMoves(kingPos, `${player}_${pieces[k]}`, false);
+    kingMoves = check__forMoves(kingPos, `${player}_${pieces[k].piece}`, false);
 
     // if it has possible moves, check every move
     if (kingMoves.length > 0) {
@@ -768,10 +850,10 @@ function check__forChecks(player) {
         // if any of the possible moves would capture the opponent's piece of the same kind as being checked, then that piece at that position could take the king
         if (
           spots.find((x) => x.pos == kingMoves[j]).piece ==
-          `${opponent}_${pieces[k]}`
+          `${opponent}_${pieces[k].piece}`
         )
           // if this is true, push the check's position and piece causing check to variable
-          checks.push({ at: kingMoves[j], piece: pieces[k] });
+          checks.push({ at: kingMoves[j], piece: pieces[k].piece });
       }
     }
   }
@@ -808,6 +890,11 @@ function testMoveForChecks(
 }
 
 function refreshBoard(boardCondition) {
+  if (boardCondition.length < 64) {
+    for (i = 0; i < spots.length; i++) {
+      document.getElementById(`spot${spots[i].pos}`).style.backgroundImage = "";
+    }
+  }
   for (i = 0; i < boardCondition.length; i++) {
     if (boardCondition[i].piece == "") {
       document.getElementById(
@@ -946,4 +1033,133 @@ function promotePiece(piece) {
   document.getElementById("promote").style.display = "none";
 
   paused = false;
+}
+
+function check__forNoMoves(player) {
+  let playerPieces = [];
+  for (i = 0; i < spots.length; i++) {
+    // puts all of the player's pieces into an array
+    if (spots[i].piece.substring(0, 1) == player) {
+      playerPieces.push(spots[i]);
+    }
+  }
+  for (z = 0; z < playerPieces.length; z++) {
+    // checks all of player's pieces for any moves, accounting for checks
+    if (
+      check__forMoves(playerPieces[z], playerPieces[z].piece, true, true)
+        .length > 0
+    ) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function endGame(result) {
+  let w_score;
+  let b_score;
+
+  stage = "modal open";
+
+  document.getElementById("move_list").classList.add("game-ended");
+
+  result = result.split(",");
+
+  if (result[0].split(" ")[1] == "Wins") {
+    if (result[0].split(" ")[0] == "White") {
+      w_score = "1";
+      b_score = "0";
+    } else {
+      w_score = "0";
+      b_score = "1";
+    }
+  } else {
+    w_score = "<sup>1</sup><em>/</em><sub>2</sub>";
+    b_score = "<sup>1</sup><em>/</em><sub>2</sub>";
+  }
+
+  let modal = document.getElementById("modal");
+  let w_scoreEl = document.getElementById("w_score");
+  let b_scoreEl = document.getElementById("b_score");
+  let resultTotal = document.getElementById("result");
+  let resultDetails = document.getElementById("result-by");
+  modal.style.display = "flex";
+  setTimeout(() => {
+    modal.style.opacity = "1";
+  }, 200);
+  w_scoreEl.innerText = w_score;
+  b_scoreEl.innerText = b_score;
+  resultTotal.innerText = result[0];
+  resultDetails.innerText = `by ${result[1]}`;
+}
+
+function reviewGame() {
+  let modal = document.getElementById("modal");
+  let navigation = document.getElementById("move-nav");
+
+  navigation.classList.add("show");
+
+  modal.classList.add("collapsed");
+  setTimeout(() => {
+    // stops click on "review game" from un-collapsing modal
+    stage = "review";
+  }, 500);
+
+  let el = document.querySelector("#move_list > span:first-of-type");
+
+  reviewMove(0, el);
+}
+
+function reviewMove(move, el) {
+  if (stage != "review") return;
+
+  if (move == "next") {
+    move = moveReviewing + 1;
+    if (move >= moveHistory.length) move = moveHistory.length - 1;
+    el = document.querySelectorAll(`#move_list > span`);
+    el = el[move];
+  } else if (move == "last") {
+    move = moveReviewing - 1;
+    if (move < 0) move = 0;
+    el = document.querySelectorAll(`#move_list > span`);
+    el = el[move];
+  }
+
+  let highlighted = document.querySelectorAll("mark");
+  let html;
+  for (i = 0; i < highlighted.length; i++) {
+    html = highlighted[i].outerHTML.split(">");
+    html = html[1].split("<")[0];
+    highlighted[i].outerHTML = html;
+  }
+
+  let text = el.innerText;
+  el.innerHTML = `<mark>${text}</mark>`;
+
+  moveReviewing = move;
+
+  removeHightlights(moveHistory[move].highlighted);
+  refreshBoard(moveHistory[move].curPos);
+}
+
+function calcPieceValue(boardCondition) {
+  let b_value = 0;
+  let w_value = 0;
+  for (i = 0; i < boardCondition.length; i++) {
+    if (boardCondition[i].piece != "") {
+      if (boardCondition[i].piece.substring(0, 1) == "w") {
+        w_value += pieceToValue(boardCondition[i].piece.substring(2));
+      } else {
+        b_value += pieceToValue(boardCondition[i].piece.substring(2));
+      }
+    }
+  }
+  return { w_value: w_value, b_value: b_value };
+}
+
+function openModal() {
+  if (stage != "review") return;
+  let modal = document.getElementById("modal");
+  modal.classList.remove("collapsed");
+  stage = "modal open";
 }

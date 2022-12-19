@@ -89,14 +89,14 @@ var spots = [
 ];
 
 // var spots = [
-//   { pos: "11", piece: "w_rook" },
+//   { pos: "11", piece: "w_king" },
 //   { pos: "12", piece: "" },
 //   { pos: "13", piece: "" },
-//   { pos: "14", piece: "w_queen" },
-//   { pos: "15", piece: "w_king" },
+//   { pos: "14", piece: "" },
+//   { pos: "15", piece: "" },
 //   { pos: "16", piece: "" },
 //   { pos: "17", piece: "" },
-//   { pos: "18", piece: "w_rook" },
+//   { pos: "18", piece: "" },
 //   { pos: "21", piece: "" },
 //   { pos: "22", piece: "" },
 //   { pos: "23", piece: "" },
@@ -104,58 +104,65 @@ var spots = [
 //   { pos: "25", piece: "" },
 //   { pos: "26", piece: "" },
 //   { pos: "27", piece: "" },
-//   { pos: "28", piece: "b_pawn" },
+//   { pos: "28", piece: "" },
 //   { pos: "31", piece: "" },
 //   { pos: "32", piece: "" },
 //   { pos: "33", piece: "" },
-//   { pos: "34", piece: "b_king" },
+//   { pos: "34", piece: "" },
 //   { pos: "35", piece: "" },
 //   { pos: "36", piece: "" },
 //   { pos: "37", piece: "" },
 //   { pos: "38", piece: "" },
-//   { pos: "41", piece: "w_pawn" },
-//   { pos: "42", piece: "w_pawn" },
-//   { pos: "43", piece: "w_pawn" },
-//   { pos: "44", piece: "w_pawn" },
-//   { pos: "45", piece: "w_pawn" },
-//   { pos: "46", piece: "w_pawn" },
-//   { pos: "47", piece: "w_pawn" },
-//   { pos: "48", piece: "w_pawn" },
-//   { pos: "51", piece: "b_pawn" },
-//   { pos: "52", piece: "b_pawn" },
-//   { pos: "53", piece: "b_pawn" },
-//   { pos: "54", piece: "b_pawn" },
-//   { pos: "55", piece: "b_pawn" },
-//   { pos: "56", piece: "b_pawn" },
-//   { pos: "57", piece: "b_pawn" },
-//   { pos: "58", piece: "b_pawn" },
+//   { pos: "41", piece: "" },
+//   { pos: "42", piece: "" },
+//   { pos: "43", piece: "" },
+//   { pos: "44", piece: "" },
+//   { pos: "45", piece: "" },
+//   { pos: "46", piece: "" },
+//   { pos: "47", piece: "" },
+//   { pos: "48", piece: "" },
+//   { pos: "51", piece: "" },
+//   { pos: "52", piece: "" },
+//   { pos: "53", piece: "" },
+//   { pos: "54", piece: "" },
+//   { pos: "55", piece: "" },
+//   { pos: "56", piece: "" },
+//   { pos: "57", piece: "" },
+//   { pos: "58", piece: "" },
 //   { pos: "61", piece: "" },
 //   { pos: "62", piece: "" },
-//   { pos: "63", piece: "" },
+//   { pos: "63", piece: "w_queen" },
 //   { pos: "64", piece: "" },
 //   { pos: "65", piece: "" },
 //   { pos: "66", piece: "" },
 //   { pos: "67", piece: "" },
 //   { pos: "68", piece: "" },
 //   { pos: "71", piece: "" },
-//   { pos: "72", piece: "" },
+//   { pos: "72", piece: "w_rook" },
 //   { pos: "73", piece: "" },
 //   { pos: "74", piece: "" },
 //   { pos: "75", piece: "" },
 //   { pos: "76", piece: "" },
 //   { pos: "77", piece: "" },
 //   { pos: "78", piece: "" },
-//   { pos: "81", piece: "b_rook" },
+//   { pos: "81", piece: "b_king" },
 //   { pos: "82", piece: "" },
 //   { pos: "83", piece: "" },
-//   { pos: "84", piece: "b_queen" },
-//   { pos: "85", piece: "b_king" },
+//   { pos: "84", piece: "" },
+//   { pos: "85", piece: "" },
 //   { pos: "86", piece: "" },
 //   { pos: "87", piece: "" },
-//   { pos: "88", piece: "b_rook" },
+//   { pos: "88", piece: "" },
 // ];
 
-const pieces = ["pawn", "rook", "knight", "bishop", "queen", "king"];
+const pieces = [
+  { piece: "pawn", value: 1 },
+  { piece: "rook", value: 5 },
+  { piece: "knight", value: 3 },
+  { piece: "bishop", value: 3 },
+  { piece: "queen", value: 9 },
+  { piece: "king", value: 0 },
+];
 
 const moves = [
   // pattern: "[x-change] [y-change]", conditions: "[any condition]"
@@ -226,10 +233,10 @@ const moves = [
     { pattern: "-1 -1", conditions: "" },
     { pattern: "0 -1", conditions: "" },
     { pattern: "1 -1", conditions: "" },
-    { pattern: "2 0", conditions: "castle-short,empty x:6,empty x:7" },
+    { pattern: "2 0", conditions: "castle-short,empty x:6,empty x:7,rook x:8" },
     {
       pattern: "-2 0",
-      conditions: "castle-long,empty x:2,empty x:3,empty x:4",
+      conditions: "castle-long,empty x:2,empty x:3,empty x:4,rook x:1",
     },
   ],
 ];
@@ -250,12 +257,22 @@ function numberToLetter(num) {
   let letter;
   if (num > 8 || num < 1) {
     console.error(
-      `Number out of range \n range is ${numToLett[0][0]}-${
+      `Number out of range. \n range is ${numToLett[0][0]}-${
         numToLett[numToLett.length - 1][0]
-      }; Number inputed was ${num}`
+      }; Number inputed was ${num}.`
     );
     return false;
   }
   letter = numToLett.find((x) => x[0] == num)[1];
   return letter;
+}
+
+function pieceToValue(piece) {
+  let object = pieces.find((x) => x.piece == piece);
+  if (object == undefined) {
+    console.error(`Piece not found. \n Inputed value was ${piece}.`);
+    return false;
+  } else {
+    return object.value;
+  }
 }

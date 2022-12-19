@@ -135,6 +135,11 @@ body {
   max-width: 2em;
   vertical-align: middle;
 }
+#w_captures,
+#b_captures {
+  display: flex;
+  flex-direction: column;
+}
 #w_value,
 #b_value {
   position: absolute;

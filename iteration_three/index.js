@@ -11,6 +11,8 @@ var b_castleShort = true;
 var keepHighlight = [];
 var moveHistory = [];
 var values = { w_value: 39, b_value: 39 };
+var w_captures = {};
+var b_captures = {};
 var promoteMoveStore = []; // stored information for when pawn is promoting
 var paused = false; // set to true when player input is needed before any other move should be made (pawn promotion)
 var stage; // used to indicate what stage the game is in (playing, review, etc.)
@@ -209,13 +211,21 @@ function movePiece(from, to) {
   }
   // #endregion dealing with special cases
 
-  // adds piece captured to display for captured pieces
+  // adds piece captured to variable and organizes/puts piece into display element
   if (to.piece != "") {
-    document.getElementById(
-      `${currentPlayer}_captures`
-    ).innerHTML += `<img src="assets/${
-      to.piece
-    }.png" alt="capture - ${to.piece.substring(2)}">`;
+    if (currentPlayer == "w") {
+      w_captures.push(to.piece.substring(2));
+    } else {
+      b_captures.push(to.piece.substring(2));
+    }
+    refreshCaptures();
+  } else if (special == "en passant") {
+    if (currentPlayer == "w") {
+      w_captures.push("pawn");
+    } else {
+      b_captures.push("pawn");
+    }
+    refreshCaptures();
   }
 
   // moves "from" piece to "to" spot
@@ -766,10 +776,10 @@ function recordMove(from, to, piece, capture, special, isCheck, disambiguity) {
 
     let toNot = numberToLetter(to.substring(1, 2)) + to.substring(0, 1); // toNot = toNotation
     if (capture) move = disambiguity + piece + "x" + toNot + suffix;
-    if (!capture) move = disambiguity + piece + toNot + suffix;
+    else move = disambiguity + piece + toNot + suffix;
   }
 
-  // calculates the piece values if a piece is captured
+  // calculates the piece values if a piece is captured or pawn was promoted
   if (capture || special == "promote") values = calcPieceValue(spots);
   let difference = values.w_value - values.b_value;
   let w_valueEl = document.getElementById("w_value");
@@ -805,6 +815,8 @@ function recordMove(from, to, piece, capture, special, isCheck, disambiguity) {
     player: player,
     move: move,
     highlighted: highlights,
+    values: values,
+    captures: captures,
     curPos: currentPos,
   });
 
@@ -993,13 +1005,21 @@ function promotePiece(piece) {
   let check = false;
   let disambiguity = "";
 
-  // adds piece captured to display for captured pieces
+  // adds piece captured to variable and organizes/puts piece into display element
   if (to.piece != "") {
-    document.getElementById(
-      `${currentPlayer}_captures`
-    ).innerHTML += `<img src="assets/${
-      to.piece
-    }.png" alt="capture - ${to.piece.substring(2)}">`;
+    if (currentPlayer == "w") {
+      w_captures.push(to.piece.substring(2));
+    } else {
+      b_captures.push(to.piece.substring(2));
+    }
+    refreshCaptures();
+  } else if (special == "en passant") {
+    if (currentPlayer == "w") {
+      w_captures.push("pawn");
+    } else {
+      b_captures.push("pawn");
+    }
+    refreshCaptures();
   }
 
   // moves "from" piece to "to" spot
@@ -1162,4 +1182,25 @@ function openModal() {
   let modal = document.getElementById("modal");
   modal.classList.remove("collapsed");
   stage = "modal open";
+}
+
+function addCapture() {
+  
+}
+
+function refreshCaptures() {
+  let captures = [];
+  for (i = 0; i < w_captures.length; i++) {
+    captures.push(w_captures[i]);
+  }
+  w_captures = organizeCaptures(captures);
+  captures = [];
+  for (i = 0; i < b_captures.length; i++) {
+    captures.push(b_captures[i]);
+  }
+  b_captures = organizeCaptures(captures);
+
+  let wEl = document.getElementById("w_captures");
+  wEl.getElementsByClassName("pawns")[0].classList.add(`${pawns}`);
+}
 }

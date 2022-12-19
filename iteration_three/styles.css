@@ -285,13 +285,13 @@ mark {
   flex-direction: column;
   text-align: center;
   place-items: center;
-  transition: opacity 0.4s ease, width 0.4s ease 0.25s, height 0.4s ease 0.25s,
+  transition: opacity 0.4s ease, width 0.4s ease 0.25s, height 0.3s ease 0.25s,
     inset 0.4s ease, transform 0.4s ease, border-radius 0.2s ease;
 }
 #modal * {
   display: auto;
   opacity: 1;
-  transition: opacity 0.2s ease 0.5s;
+  transition: opacity 0.2s ease 0.65s;
 }
 #modal::after {
   content: "^";
@@ -336,7 +336,8 @@ mark {
   width: fit-content;
   text-align: center;
   text-decoration: underline transparent;
-  transition: color 0.1s ease, text-decoration 0.1s ease, opacity 0.2s ease 0.5s;
+  transition: color 0.1s ease, text-decoration 0.1s ease,
+    opacity 0.2s ease 0.65s;
 }
 #modal > select > option {
   color: #000;

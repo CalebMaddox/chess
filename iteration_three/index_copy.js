@@ -16,8 +16,28 @@ var paused = false; // set to true when player input is needed before any other 
 var stage; // used to indicate what stage the game is in (playing, review, etc.)
 var moveReviewing = 0; // indicates which move is being reviewed (allows for "next move" and "previous move" buttons)
 
+// page styling vars (to be set with settings)
+var color = "0 0 0";
+var accentColor = "32, 32, 32";
+var backgroundColor = "229, 229, 229";
+var backgroundContrast = "10, 10, 10";
+var boardColors = ["85, 85, 85", "170, 170, 170"];
+var highlightFilters = ["sepia(0.8) brightness(1.35)", "sepia(0.8)"];
+
 // runs on page load
 window.addEventListener("load", function () {
+  let root = document.documentElement;
+  root.style = `
+    --color: ${color};
+    --color-accent: ${accentColor};
+    --background-color: ${backgroundColor};
+    --contrast: ${backgroundContrast};
+    --even: ${boardColors[0]};
+    --odd: ${boardColors[1]};
+    --highlight-even: ${highlightFilters[0]};
+    --highlight-odd: ${highlightFilters[1]};
+  `;
+
   // sets favicon
   let favicon = document.createElement("link");
   favicon.setAttribute("rel", "shortcut icon");
@@ -29,7 +49,9 @@ window.addEventListener("load", function () {
   document.querySelector("head").appendChild(favicon);
 
   // puts pieces in their respective spots
-  refreshBoard(spots);
+  setTimeout(() => {
+    refreshBoard(spots);
+  }, 500);
 
   // displays value difference (should start as 0 to 0, but may not if spots is changed)
   let difference = values.w_value - values.b_value;
@@ -47,7 +69,23 @@ window.addEventListener("load", function () {
   }
 
   stage = "playing";
+
+  check__forPlayerMoves(currentPlayer, spots);
 });
+
+function check__forPlayerMoves(player, board) {
+  let ret = false; // return value (indicates if there are any possible moves)
+  for (q = 0; q < board.length; q++) {
+    if (board[q].piece.substring(0, 1) == player) {
+      let moves = check__forMoves(board[q], board[q].piece, true, false);
+      if (moves.length > 0) ret = true;
+      board[q].possibleMoves = moves;
+    } else {
+      board[q].possibleMoves = [];
+    }
+  }
+  return ret;
+}
 
 function spotClicked(element) {
   if (paused || stage != "playing") return;
@@ -77,8 +115,7 @@ function select(position) {
 
   // adds highlight and checks for any available moves
   el_select.classList.add("highlight");
-  let possibleMoves = check__forMoves("selected", undefined, true);
-  addDots(possibleMoves);
+  addDots(selectedSpot.possibleMoves);
 }
 
 function movePiece(from, to) {
@@ -260,31 +297,30 @@ function movePiece(from, to) {
     checks = check__forChecks("w");
   }
   if (checks[0]) check = true;
-  if (check) {
-    if (currentPlayer == "w") {
-      if (check__forNoMoves("b")) {
+
+  let anyMove;
+  if (currentPlayer == "w") {
+    anyMove = check__forPlayerMoves("b", spots);
+  } else {
+    anyMove = check__forPlayerMoves("w", spots);
+  }
+  switchPlayer();
+
+  if (!anyMove) {
+    if (check) {
+      if (currentPlayer == "b") {
         endGame("White Wins,checkmate");
         special = "checkmate";
-      }
-    } else {
-      if (check__forNoMoves("w")) {
+      } else {
         endGame("Black Wins,checkmate");
         special = "checkmate";
       }
-    }
-  } else {
-    if (currentPlayer == "w") {
-      if (check__forNoMoves("b")) {
-        endGame("Tie,stalemate");
-        special = "stalmate";
-      }
     } else {
-      if (check__forNoMoves("w")) {
-        endGame("Tie,stalemate");
-        special = "stalmate";
-      }
+      endGame("Tie,stalemate");
+      special = "stalmate";
     }
   }
+
   let move = recordMove(
     from.pos,
     to.pos,
@@ -295,14 +331,14 @@ function movePiece(from, to) {
     disambiguity
   );
   addToHistory(move);
-
-  switchPlayer();
 }
 
 function check__canMove(clickedSpot) {
-  // just checks if the spot has a dot on it. Dots are set on select, so they should be same as any possible moves
   let result = false;
-  if (dots.find((x) => x == clickedSpot.pos) != undefined) result = true;
+  if (
+    selectedSpot.possibleMoves.find((pl) => pl == clickedSpot.pos) != undefined
+  )
+    result = true;
   return result;
 }
 
@@ -327,6 +363,7 @@ function check__forMoves(code, piece, checkChecks, checkingForNoMoves) {
       piece = piece.split("_");
       break;
   }
+  let player = piece[0];
 
   // checks if piece is gone, will king be in check. If not, don't check for checks in runPatterns (there is no way in chess for a piece to force a check upon the player if it can be removed and not cause a discovered check)
   if (
@@ -335,7 +372,7 @@ function check__forMoves(code, piece, checkChecks, checkingForNoMoves) {
     spots.find((x) => x.pos == spot.pos).piece.substring(2) != "king"
   ) {
     spots.find((x) => x.pos == spot.pos).piece = "";
-    checkChecks = check__forChecks(currentPlayer)[0];
+    checkChecks = check__forChecks(player)[0];
     spots.find((x) => x.pos == spot.pos).piece = `${piece[0]}_${piece[1]}`;
   }
 
@@ -384,6 +421,12 @@ function runPatterns(patterns, currentSpot, player, checkChecks) {
   let possibilities = []; // possible outputs (before checking for checks) is built on this
   let final = []; // output is built on this variable
   let passed = true; // allows conditions to prevent output possibility
+
+  if (player == "w") {
+    opponent = "b";
+  } else {
+    opponent = "w";
+  }
 
   // running through all possible patterns for given piece
   for (i = 0; i < patterns.length; i++) {
@@ -605,6 +648,8 @@ function runPatterns(patterns, currentSpot, player, checkChecks) {
                   if (spots.find((x) => x.pos == coord).piece != "") {
                     passed = false;
                   }
+                } else if (command == "notAttacked") {
+                  // passed = false;
                 } else {
                   // certain piece must be on this spot
                   if (
@@ -840,9 +885,13 @@ function check__forChecks(player) {
   }
 
   // running through pieces and their respective possible moves
-  for (k = 0; k < pieces.length; k++) {
+  for (asgbdasb = 0; asgbdasb < pieces.length; asgbdasb++) {
     // checks moves that a piece of every kind could make if in place of the king
-    kingMoves = check__forMoves(kingPos, `${player}_${pieces[k].piece}`, false);
+    kingMoves = check__forMoves(
+      kingPos,
+      `${player}_${pieces[asgbdasb].piece}`,
+      false
+    );
 
     // if it has possible moves, check every move
     if (kingMoves.length > 0) {
@@ -850,10 +899,10 @@ function check__forChecks(player) {
         // if any of the possible moves would capture the opponent's piece of the same kind as being checked, then that piece at that position could take the king
         if (
           spots.find((x) => x.pos == kingMoves[j]).piece ==
-          `${opponent}_${pieces[k].piece}`
+          `${opponent}_${pieces[asgbdasb].piece}`
         )
           // if this is true, push the check's position and piece causing check to variable
-          checks.push({ at: kingMoves[j], piece: pieces[k].piece });
+          checks.push({ at: kingMoves[j], piece: pieces[asgbdasb].piece });
       }
     }
   }
@@ -909,45 +958,26 @@ function refreshBoard(boardCondition) {
 }
 
 function checkAmbiguity(from, to, piece) {
-  from = spots.find((g) => g.pos == from);
-  to = spots.find((g) => g.pos == to);
-
-  let toPiece = to.piece;
-  let opponent;
   let ambiguousSpots = [];
   let y_ambiguous = false;
   let x_ambiguous = false;
 
-  if (currentPlayer == "w") {
-    opponent = "b";
-  } else {
-    opponent = "w";
-  }
-
-  from.piece = "";
-  to.piece = `${opponent}_${piece.substring(2)}`;
-  let movePoss = check__forMoves(
-    to,
-    `${opponent}_${piece.substring(2)}`,
-    false
-  );
-  for (g = 0; g < movePoss.length; g++) {
-    if (spots.find((n) => n.pos == movePoss[g]).piece == piece) {
-      ambiguousSpots.push(movePoss[g]);
+  for (i = 0; i < spots.length; i++) {
+    if (spots[i].piece == piece && spots[i].pos != from) {
+      if (spots[i].possibleMoves.includes(to)) {
+        ambiguousSpots.push(spots[i].pos);
+      }
     }
   }
-
-  from.piece = piece;
-  to.piece = toPiece;
 
   if (ambiguousSpots.length == 0) {
     return [false];
   } else {
     for (g = 0; g < ambiguousSpots.length; g++) {
-      if (ambiguousSpots[g].substring(0, 1) == from.pos.substring(0, 1)) {
+      if (ambiguousSpots[g].substring(0, 1) == from.substring(0, 1)) {
         y_ambiguous = true;
       }
-      if (ambiguousSpots[g].substring(1, 2) == from.pos.substring(1, 2)) {
+      if (ambiguousSpots[g].substring(1, 2) == from.substring(1, 2)) {
         x_ambiguous = true;
       }
     }
@@ -1035,26 +1065,6 @@ function promotePiece(piece) {
   paused = false;
 }
 
-function check__forNoMoves(player) {
-  let playerPieces = [];
-  for (i = 0; i < spots.length; i++) {
-    // puts all of the player's pieces into an array
-    if (spots[i].piece.substring(0, 1) == player) {
-      playerPieces.push(spots[i]);
-    }
-  }
-  for (z = 0; z < playerPieces.length; z++) {
-    // checks all of player's pieces for any moves, accounting for checks
-    if (
-      check__forMoves(playerPieces[z], playerPieces[z].piece, true, true)
-        .length > 0
-    ) {
-      return false;
-    }
-  }
-  return true;
-}
-
 function endGame(result) {
   let w_score;
   let b_score;
@@ -1087,8 +1097,8 @@ function endGame(result) {
   setTimeout(() => {
     modal.style.opacity = "1";
   }, 200);
-  w_scoreEl.innerText = w_score;
-  b_scoreEl.innerText = b_score;
+  w_scoreEl.innerHTML = w_score;
+  b_scoreEl.innerHTML = b_score;
   resultTotal.innerText = result[0];
   resultDetails.innerText = `by ${result[1]}`;
 }

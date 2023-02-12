@@ -46,6 +46,7 @@
   box-sizing: border-box;
   color: var(--text-color);
   font-weight: 400;
+  font-size: inherit;
 }
 
 *::-webkit-scrollbar,
@@ -99,17 +100,63 @@ body {
 
 /* #endregion -=general page styling=- */
 
+/* #region utility classes */
+
+.aria-hidden_display-none[aria-hidden="true"],
+.aria-hidden_display-none[aria-hidden="true"] * {
+  display: none;
+}
+
+.action-button {
+  background-color: #d9d9d9;
+  border: none;
+  padding: 0.5em 1em;
+  border-radius: 0.4em;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+.action-button:hover {
+  cursor: pointer;
+  background-color: #d0d0d0;
+}
+
+/* #endregion -=utility classes=- */
+
+/* #region pre-game display */
+
+.pre-game {
+  background-color: var(--background);
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+}
+.pre-game > div.wrapper {
+  width: fit-content;
+  height: fit-content;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  justify-content: center;
+  align-items: center;
+}
+.pre-game > div.wrapper > button {
+  width: 100%;
+  max-width: min(50vw, 20rem);
+}
+
+/* #endregion -=pre-game display=- */
+
 /* #region sidebar stylings */
 
-/* #region players styling */
+/* #region left sidebar styling */
 
-.players {
+.left-sidebar {
   overflow: hidden;
   display: grid;
   grid-template-columns: 100%;
   grid-template-rows: 1fr 1px 1fr;
 }
-.players > div {
+.left-sidebar > div {
   text-align: center;
   width: calc(
     100% - 1.5rem
@@ -117,26 +164,27 @@ body {
   margin: 1.5rem 0.75rem;
   overflow: hidden;
 }
-.players > div .identity {
+.left-sidebar > div .identity {
   width: 100%;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+  line-height: 1.75em;
 }
 .identity .username {
+  font-size: 1.5rem;
   font-weight: 500;
 }
 .identity .elo {
+  font-size: 1rem;
   color: var(--faded-text-color);
   font-weight: 500;
-  line-height: 2em;
 }
-.players .advantage {
+.left-sidebar .advantage {
   font-weight: 300;
 }
-.players > hr {
+.left-sidebar > hr {
   width: 90%;
   margin-inline: auto;
   border: 1px solid #d9d9d9;
@@ -192,19 +240,65 @@ body {
   background-image: var(--white-pawn);
 }
 
-/* #endregion -=players styling=- */
+.left-sidebar.on_createBoard {
+  padding: 1.5rem 0.75rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+form#custom-piece-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+#custom-piece-form > div {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  position: relative;
+}
+span.custom-piece-display {
+  max-height: min(5vh, 5vw);
+}
+span.custom-piece-display > img {
+  height: 100%;
+}
+#custom-piece-form input[type="file"] {
+  display: none;
+}
+#custom-piece-form label:has(input[type="file"])::after {
+  content: "Select Image";
+  cursor: pointer;
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-inline: 0.25rem;
+  font-size: 0.75em;
+  background-color: var(--light-contrast);
+  border-radius: 0.25rem;
+  filter: none;
+  box-shadow: none;
+  transition: filter 0.2s ease, box-shadow 0.2s ease;
+}
+#custom-piece-form label:has(input[type="file"]):hover::after {
+  filter: brightness(0.9);
+}
+#custom-piece-form label:has(input[type="file"]:valid)::after {
+  display: none;
+}
 
-/* #region moves/info styling */
+/* #endregion -=left sidebar styling=- */
 
-.info {
+/* #region right sidebar styling */
+
+.right-sidebar {
   position: relative;
   padding: 1.5rem 0.75rem;
   overflow: hidden;
-}
-.info > h2 {
-  font-size: var(--card-header-size);
-  text-align: center;
-  margin-bottom: 0.5em;
 }
 
 .history {
@@ -253,7 +347,7 @@ body {
   font-weight: 500;
 }
 
-.info .actions {
+.right-sidebar .actions {
   background-color: var(--pop-out-background);
   position: absolute;
   bottom: 0;
@@ -265,30 +359,27 @@ body {
   justify-content: space-evenly;
   box-shadow: 0px -10px 10px var(--pop-out-background);
 }
-.info .actions button {
-  background-color: #d9d9d9;
-  border: none;
-  padding-block: 0.5em;
+.right-sidebar .actions button {
+  font-size: 0.9em;
   width: calc(50% - 1rem);
-  border-radius: 0.4em;
-  transition: background-color 0.2s ease, box-shadow 0.2s ease;
-}
-.actions button:hover {
-  cursor: pointer;
-  background-color: #d0d0d0;
-  box-shadow: 0 4px 4px rgba(0, 0, 0, 5%);
 }
 
-/* #endregion -=moves/info styling=- */
+/* #endregion -=right sidebar styling=- */
 
-.info,
-.players {
+.right-sidebar,
+.left-sidebar {
   width: min(100%, 20vw);
   border-radius: 0.75rem;
   background-color: var(--pop-out-background);
   box-shadow: var(--box-shadow);
   border: 1px solid #d9d9d9;
   height: 100%;
+}
+.right-sidebar > h2,
+.left-sidebar > h2 {
+  font-size: var(--card-header-size);
+  text-align: center;
+  margin-bottom: 0.5em;
 }
 
 /* #endregion -=sidebar stylings=- */
@@ -303,6 +394,10 @@ body {
   grid-template-columns: repeat(8, 1fr);
   overflow: hidden;
   box-shadow: var(--box-shadow);
+  user-select: none;
+}
+.board * {
+  user-select: none;
 }
 .board > .spot {
   text-align: center;

@@ -1,7 +1,7 @@
 STORAGE board/pieces
     - board has large object with every spot on it to store everything
     - var board = { 
-        a1: { occupied: true/false, piece: "w_pawn", possibleMoves: [ { position: "b2", check: false } ] 
+        a1: { occupied: true/false, piece: "w_pawn", possibleMoves: [ { position: "b3", check: false, special: "" } ] 
       } ... 
 
 

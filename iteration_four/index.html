@@ -11,74 +11,132 @@
     <title>Chess</title>
   </head>
   <body>
-    <div id="page-wrapper" data-faded="false">
+    <!-- #region pre-game/mode selection -->
+
+    <div
+      class="pre-game aria-hidden_display-none on_preGame"
+      aria-hidden="false">
+      <div class="wrapper">
+        <button onclick="changeState('inGame')" class="action-button">
+          Start Game
+        </button>
+        <button onclick="changeState('createBoard')" class="action-button">
+          Build Your Board
+        </button>
+      </div>
+    </div>
+
+    <!-- #endregion -=pre-game/mode selection -->
+
+    <div
+      class="aria-hidden_display-none on_inGame on_createBoard"
+      id="page-wrapper"
+      data-faded="false"
+      aria-hidden="true">
       <!-- #region players sidebar -->
 
-      <div class="players">
+      <div
+        class="left-sidebar | aria-hidden_display-none on_inGame"
+        aria-hidden="true">
         <div class="player1">
           <div class="identity">
             <h2 class="username">Player 1</h2>
-            <h3 class="elo">3261</h3>
+            <h3 class="elo">400</h3>
           </div>
-          <p class="advantage" id="advantage1">+2</p>
+          <p class="advantage" id="advantage1"></p>
           <div id="w_captures" class="captures">
-            <div class="pawns">
-              <div></div>
-              <div></div>
-            </div>
-            <div class="bishops">
-              <div></div>
-              <div></div>
-            </div>
-            <div class="knights">
-              <div></div>
-            </div>
-            <div class="rooks">
-              <div></div>
-              <div></div>
-            </div>
-            <div class="queens">
-              <div></div>
-              <div></div>
-            </div>
+            <div class="pawns"></div>
+            <div class="bishops"></div>
+            <div class="knights"></div>
+            <div class="rooks"></div>
+            <div class="queens"></div>
           </div>
         </div>
         <hr />
         <div class="player2">
           <div class="identity">
             <h2 class="username">Player 2</h2>
-            <h3 class="elo">3261</h3>
+            <h3 class="elo">400</h3>
           </div>
-          <p class="advantage" id="advantage2">+2</p>
+          <p class="advantage" id="advantage2"></p>
           <div id="b_captures" class="captures">
-            <div class="pawns">
-              <div></div>
-              <div></div>
-            </div>
-            <div class="bishops">
-              <div></div>
-              <div></div>
-            </div>
-            <div class="knights">
-              <div></div>
-            </div>
-            <div class="rooks">
-              <div></div>
-              <div></div>
-            </div>
-            <div class="queens">
-              <div></div>
-              <div></div>
-            </div>
+            <div class="pawns"></div>
+            <div class="bishops"></div>
+            <div class="knights"></div>
+            <div class="rooks"></div>
+            <div class="queens"></div>
           </div>
         </div>
+      </div>
+
+      <div
+        class="left-sidebar | aria-hidden_display-none on_createBoard"
+        aria-hidden="true">
+        <h2>Custom Piece</h2>
+        <form
+          onsubmit="createPiece(this)"
+          id="custom-piece-form"
+          action="javascript:void(0);">
+          <div>
+            <label for="piece-name">Name</label>
+            <input
+              type="text"
+              maxlength="20"
+              name="pieceName"
+              id="piece-name"
+              required />
+          </div>
+          <div>
+            <label for="custom-piece-img-w"
+              >White Piece Img<input
+                type="file"
+                name="pieceImgW"
+                id="custom-piece-img-w"
+                accept="image/*"
+                required
+            /></label>
+
+            <span
+              id="custom-piece-img-display_w"
+              class="custom-piece-display"></span>
+          </div>
+          <div>
+            <label for="custom-piece-img-b"
+              >Black Piece Img<input
+                type="file"
+                name="pieceImgB"
+                id="custom-piece-img-b"
+                accept="image/*"
+                class="action-button"
+                required
+            /></label>
+
+            <span
+              id="custom-piece-img-display_b"
+              class="custom-piece-display"></span>
+          </div>
+          <div>
+            <label for="piece-value">Value</label>
+            <input
+              type="number"
+              inputmode="numeric"
+              max="20"
+              min="1"
+              name="pieceValue"
+              id="piece-value"
+              value="1" />
+          </div>
+          <button type="submit">Submit</button>
+        </form>
       </div>
 
       <!-- #endregion -=players sidebar=- -->
 
       <!-- #region board -->
 
-      <div class="board">
+      <div
+        class="board | aria-hidden_display-none on_inGame on_createBoard"
+        aria-hidden="true">
         <span class="spot" id="a8" data-highlighted="false"></span>
         <span class="spot" id="b8" data-highlighted="false"></span>
         <span class="spot" id="c8" data-highlighted="false"></span>
@@ -177,7 +235,9 @@
 
       <!-- #region info/history sidebar -->
 
-      <div class="info">
+      <div
+        class="right-sidebar | aria-hidden_display-none on_inGame"
+        aria-hidden="true">
         <h2>Moves</h2>
         <div class="history">
           <div class="move-head"><span>White</span><span>Black</span></div>
@@ -186,6 +246,15 @@
         <div class="actions">
           <button class="action-button">Resign</button
           ><button class="action-button">Offer Draw</button>
+        </div>
+      </div>
+      <div
+        class="right-sidebar | aria-hidden_display-none on_createBoard"
+        aria-hidden="true">
+        <h2>Pieces</h2>
+        <div class="actions">
+          <button class="action-button">Save Board</button>
+          <button class="action-button">Play Friend With Board</button>
         </div>
       </div>
 
@@ -214,7 +283,7 @@
         <li>
           <p>Theme</p>
           <div
-            class="switch settings-component setting-changed-on-click"
+            class="switch settings-component | setting-changed-on-click"
             id="theme-switch"
             data-checked="false"
             onclick="sliderToggle(this)"
@@ -238,7 +307,7 @@
                 d="M137.4 374.6c12.5 12.5 32.8 12.5 45.3 0l128-128c9.2-9.2 11.9-22.9 6.9-34.9s-16.6-19.8-29.6-19.8L32 192c-12.9 0-24.6 7.8-29.6 19.8s-2.2 25.7 6.9 34.9l128 128z" />
             </svg>
             <div
-              class="settings-component dropdown-option setting-changed-on-click"
+              class="settings-component dropdown-option | setting-changed-on-click"
               data-piece-style="neo"
               style="--num: 1"
               data-disabled="true"
@@ -246,7 +315,7 @@
               Neo
             </div>
             <div
-              class="settings-component dropdown-option setting-changed-on-click"
+              class="settings-component dropdown-option | setting-changed-on-click"
               data-piece-style="classic"
               style="--num: 2"
               data-disabled="true"
@@ -262,4 +331,12 @@
 
     <!-- #endregion -=out of page wrapper=- -->
   </body>
+  <script>
+    $(document).ready(function () {
+      let spots = $(".spot");
+      for (let i = 0; i < spots.length; i++) {
+        spots[i].innerText = spots[i].id;
+      }
+    });
+  </script>
 </html>

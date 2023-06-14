@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="game.css" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="Game.js"></script>
+    <script src="uiControl.js"></script>
+    <script src="data.js"></script>
+    <title>Chess</title>
+  </head>
+
+  <script>
+    // Sets game type using url (would be set before redirecting to page from home screen)
+    let urlParams = new URLSearchParams(window.location.search);
+    let gameType = urlParams.get("gameType");
+    if (!gameType) {
+      urlParams.set("gameType", "classic");
+      window.location.search = urlParams.toString();
+    }
+
+    // Initializes game based on url queries.
+    let startingPosition = gameTypeStartingPositions[gameType];
+
+    const game = new Game(startingPosition);
+
+    window.addEventListener("load", function () {
+      let boardEl = document.getElementById("board");
+
+      for (i = startingPosition.length; i > 0; i--) {
+        let rowEl = document.createElement("div");
+        rowEl.classList.add("row");
+        rowEl.dataset.rank = i.toString();
+
+        for (j = 1; j <= startingPosition[i - 1].length; j++) {
+          let spotEl = document.createElement("div");
+          spotEl.classList.add("spot");
+          spotEl.dataset.rank = i;
+          spotEl.dataset.file = numToLetter(j);
+          spotEl.addEventListener("click", function (e) {
+            game.spotClicked(e.target);
+          });
+          rowEl.appendChild(spotEl);
+        }
+
+        boardEl.appendChild(rowEl);
+      }
+
+      game.handlePageLoad();
+    });
+  </script>
+
+  <body data-theme="bright">
+    <div class="board" id="board"></div>
+  </body>
+</html>

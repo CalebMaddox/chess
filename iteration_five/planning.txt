@@ -1,0 +1,132 @@
+Board Page JS:
+    - can display current and past board positions and the moves made previous to the displayed position.
+      - when previous position is selected in history stack, display the board as that position, and highlight the relevant move. 
+    - displays possible moves when position is selected.
+      - when selection is made, use check moves method in Game class.
+    - recognizes and verifies attempted moves.
+      - when spot is clicked:
+        - if a position is already selected:
+            - if spot clicked is occupied by friendly piece, change selection.
+            - if spot clicked is a possible move: call function to make the move.
+            - else: reference settings for "impossible move attempted" setting [ remove selection, do nothing ].
+        - if no position is selected:
+            - if spot clicked is occupied by a friendly piece, make selection.
+
+Game Class:
+    - stores settings for game instance.
+    - stores board position and history.
+    - stores possible moves (returned through back-end commit move function).
+
+    - Check for moves:
+      = { position to be checked }
+        - a piece's possible moves are checked only when it is clicked, then the array will be saved to list of possible moves, essentially making a "memory".
+        - checks a certain piece's possible moves, and the special properties attributed to the moves
+      = { possible moves, in array of objects with destination position and special props }
+    - Make move:
+      = { selected position, object in same form as returned by Check for moves method }
+
+- BOARD STORAGE:
+  2d array with piece notation, capital for white, lowercase for black
+  - also stores 4 variables for castling: w_short_castle, w_long_castle, b_short_castle, and b_long_castle
+
+- MOVES:
+  - NO MOVE MAY PUT FRIENDLY KING IN CHECK
+
+  - pawns:
+    - one rank forward ( greater for white, lesser for black )
+     -> REQS:
+      - no piece on the space in front 
+    - two ranks forward ( greater for white, lesser for black )
+     -> REQS:
+      - pieces on neither the space directly in front nor the destination space
+      - the pawn resides on its starting square ( 2nd rank for white, 7th rank for black )
+     -> SPECIAL PROPERTIES:
+      - creates en passant possibilites on the next move for enemy pawns residing on the squares exactly one file over, on the same rank.
+    - normal capture ( one rank forward and one file over )
+     -> REQS:
+      - an enemy piece resides on the destination square
+    - en passant ( one rank forward and one file over )
+     -> REQS:
+      - an enemy pawn, on the previous move, moved two ranks forward and resides on a square on the same rank and one file over from the moving pawn.
+     -> SPECIAL PROPERTIES:
+      - captures the enemy pawn exactly one rank behind (less for white, greater for black), on the same file.
+    =-> IF a pawn makes it to the opposite side of the board from its king ( 8th rank for white, 1st for black ), the pawn is removed and the game must be paused until selection of a new piece ( bishop, knight, rook, or queen ) to take its place is made. <-=
+  
+  - bishops:
+    - diagonal any amount of squares, until the physical path would be blocked, by any piece ( can capture on the first blocked position, should it contain an enemy piece )
+    
+    REPRESETED + +, + -, - +, - -,
+
+  - knights:
+    - 2 squares difference in rank, 1 in file
+    - 2 squares difference in file, 1 in rank
+
+  - rooks:
+    - any cardinal direction any amount of squares, until the physical path would be blocked, by any piece ( can capture on the first blocked position, should it contain an enemy piece )
+
+    REPRESENTED + 0, 0 +, - 0, 0 -
+
+    !! IF rook was on 'a' file, set [player]_long_castle to false
+    !! IF rook was on 'h' file, set [player]_short_castle to false
+  
+  - queens:
+    - combination of bishop and rook.
+
+    REPRESENTED 0 +, + +, + 0, + -, 0 -, - -, - 0, - + 
+
+  - kings:
+    - short castle ( moves to same rank, 'g' file )
+     -> REQS:
+      - no pieces in on same rank, 'g' or 'f' files
+     -> SPECIAL PROPERTIES:
+      - rook on same rank, 'h' file is removed and placed on same rank, 'f' file
+    - long castle ( moves to same rank, 'c' file )
+     -> REQS:
+      - no pieces in on same rank, 'b', 'c' or 'd' files
+     -> SPECIAL PROPERTIES:
+      - rook on same rank, 'a' file is removed and placed on same rank, 'd' file
+    - any direction one space ( including diagonals )
+
+    REPRESENTED 0 1, 1 1, 1 0, 1 -1, 0 -1, -1 -1, -1 0, -1 1
+
+    !! IF move made, set both [player]_short_castle and [player]_long_castle to false
+
+- SPECIAL PROPERTIES:
+  - ALL:
+    - capture
+      -> is notated by an "x" before new position ( Rxd4 )
+  - pawns:
+    - double-advance
+      -> creates en passant possibilites for enemy pawns residing on the squares exactly one file over, on the same rank.
+    - en-passant
+      -> captures the enemy pawn exactly one rank behind (less for white, greater for black), on the same file.
+    - promotion
+      -> pawn is removed, game must be paused until selection of new piece ( bishop, knight, rook, or queen ) to take its place is made.
+  - kings:
+    - short castle ( 0-0 )
+      -> king is moved two files greater ( e -> g ) and 'h' rook is moved two files lesser ( h -> f ).
+    - long castle ( 0-0-0 ) 
+      -> king is moved two files lesser ( e -> c ) and 'a' rook is moved three files greater ( a -> d )
+
+- MOVE NOTATION:
+  - short algebraic notation (SAN)
+
+  -> move is represented as a piece's uppercase letter, followed by the destination position ( Qd4, queen moves to d4 )
+  -> captures are represented as an "x" before the destination position ( Qxd4, queen moves to d4 and captures )
+
+  -> DISAMBIGUITY: if two or more identical pieces could move to the same position, the file of departure, if they differ, should be specified following the piece's uppercase letter. 
+      If the file is shared by mulitple of the identical pieces, the rank should be specified. 
+      If both are shared between the moving piece and identical ones, both should be specified. 
+      ( Qh4xe1, the queen which resided on h4 takes on e1, there are is at least one queen sharing the same rank which could have taken on e1 and at least one sharing the same file which could have taken on e1 )
+
+  -> PAWNS: the piece's uppercase letter is ommited, replaced only by the file on which the pawn sat before a capture ( d4, pawn moves to d4 ; exd4, pawn from 'e' file takes on d4 )
+  -> PAWNS EN PASSANT: the abbreviation "e.p." follows the usual notation of capture ( exd6 e.p., pawn from 'e' file captures the pawn on d5, by using en passant and moving to d6 )
+  -> PAWNS PROMOTION: the piece which is created is notated by its uppercase letter at the end of the notation ( exd8Q, pawn from 'e' file captures on d8 and promotes to a queen )
+  
+  -> QUEENS CASTLING SHORT: 0-0 is the notation of short castle ( from 'e' file to 'g' file )
+  -> QUEENS CASTLING LONG: 0-0-0 is the notation of long castle ( from 'e' file to 'c' file )
+
+  -> CHECK: a move's notation is followed by "+" ( exd8Q+, pawn from 'e' file captures on d8 and promotes to a queen, putting the opposing king in check )
+  -> CHECKMATE: a move's notation is followed by "#" ( exd8Q#, pawn from 'e' file captures on d8 and promotes to a queen, putting the opposing king in checkmate )
+
+  -> GAME RESULT: 1-0 represents a win for white, 0-1 represents a win for black, and 1/2-1/2 represents a draw

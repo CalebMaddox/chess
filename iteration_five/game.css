@@ -1,0 +1,111 @@
+body[data-theme="bright"] {
+  --light-tile-bg: #aaa;
+  --dark-tile-bg: #777;
+}
+
+body {
+  display: grid;
+  place-items: center;
+}
+
+.board {
+  --_rows: 8;
+  --_cols: 8;
+  display: grid;
+  grid-template: repeat(var(--_rows), 1fr) / auto;
+  width: 90vmin;
+  aspect-ratio: 1;
+}
+
+.row {
+  position: relative;
+  width: 100%;
+  display: grid;
+  grid-template: auto / repeat(var(--_cols), 1fr);
+}
+.row::before {
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  content: attr(data-rank);
+  font-size: 2vmin;
+}
+
+.row:last-child > .spot::before {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translate(-50%, 20%);
+  content: attr(data-file);
+  text-transform: uppercase;
+  font-size: 2vmin;
+}
+.spot {
+  position: relative;
+  background-size: 70%;
+  background-position: center;
+  background-repeat: no-repeat;
+  width: 100%;
+  height: 100%;
+}
+.highlighted {
+  filter: sepia(50%);
+}
+.dot::after {
+  position: absolute;
+  content: "";
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 50%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background-color: #00000088;
+}
+
+.row:nth-child(even) > .spot:nth-child(even),
+.row:nth-child(odd) > .spot:nth-child(odd) {
+  background-color: var(--light-tile-bg);
+}
+.row:nth-child(even) > .spot:nth-child(odd),
+.row:nth-child(odd) > .spot:nth-child(even) {
+  background-color: var(--dark-tile-bg);
+}
+
+.spot[data-piece="r"] {
+  background-image: url("assets/pieces/br.png");
+}
+.spot[data-piece="n"] {
+  background-image: url("assets/pieces/bn.png");
+}
+.spot[data-piece="b"] {
+  background-image: url("assets/pieces/bb.png");
+}
+.spot[data-piece="q"] {
+  background-image: url("assets/pieces/bq.png");
+}
+.spot[data-piece="k"] {
+  background-image: url("assets/pieces/bk.png");
+}
+.spot[data-piece="p"] {
+  background-image: url("assets/pieces/bp.png");
+}
+.spot[data-piece="R"] {
+  background-image: url("assets/pieces/wr.png");
+}
+.spot[data-piece="N"] {
+  background-image: url("assets/pieces/wn.png");
+}
+.spot[data-piece="B"] {
+  background-image: url("assets/pieces/wb.png");
+}
+.spot[data-piece="Q"] {
+  background-image: url("assets/pieces/wq.png");
+}
+.spot[data-piece="K"] {
+  background-image: url("assets/pieces/wk.png");
+}
+.spot[data-piece="P"] {
+  background-image: url("assets/pieces/wp.png");
+}

@@ -450,9 +450,10 @@ main {
   flex-direction: row;
   flex-wrap: nowrap;
 }
-.captures > div {
+.captures > div:has(img) {
+  width: -moz-fit-content;
   width: fit-content;
-  margin-left: 0.5rem;
+  margin-left: 0.75rem;
 }
 .captures img {
   margin-left: -1.1rem;
@@ -519,6 +520,7 @@ main {
   width: var(--piece-size);
   aspect-ratio: 1;
   max-height: var(--piece-size);
+  user-select: none;
 }
 
 .row:first-child > .spot:first-child {
@@ -761,3 +763,42 @@ dl dd .input.text-input {
 /* #endregion */
 
 /* #endregion // inputs */
+
+/* #region promotion prompts */
+
+.promotion-prompt {
+  width: calc(var(--board-size) / 8);
+  display: none;
+  position: absolute;
+  flex-direction: column;
+  border-radius: 0.75rem;
+  padding: 0.325rem;
+  background-color: #00000066;
+  backdrop-filter: blur(5px);
+}
+.promotion-prompt > div {
+  border-radius: 0.5rem;
+  width: 100%;
+  aspect-ratio: 1;
+  border: 1px solid transparent;
+  display: grid;
+  place-items: center;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.promotion-prompt img {
+  user-select: none;
+  width: var(--piece-size);
+  aspect-ratio: 1;
+}
+.promotion-prompt > div:hover {
+  background-color: #0000001a;
+  border-color: #00000055;
+}
+.promotion-prompt > div:hover:active {
+  background-color: #00000030;
+}
+.promotion-prompt.open {
+  display: flex;
+}
+
+/* #endregion */

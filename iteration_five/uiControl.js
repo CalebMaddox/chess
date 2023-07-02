@@ -134,23 +134,22 @@ function updateHistory(move, notationSpecification, numMoves, scrollSetting) {
     if (move.promotion.is) {
       // move promoted a pawn
       let addTo = notationSpecification.promotion;
-      addTo = addTo.replace("PIECE", move.promotion.promoteTo);
+      addTo = addTo.replace("PIECE", move.promotion.promoteTo.toUpperCase());
 
       notation += addTo;
     }
+  }
+  if (move.check) {
+    // move puts opponent in check
+    if (move.checkmate) {
+      // move puts opponenet in checkmate
+      notation += notationSpecification.checkmate;
+    } else notation += notationSpecification.check;
+  }
 
-    if (move.check) {
-      // move puts opponent in check
-      if (move.checkmate) {
-        // move puts opponenet in checkmate
-        notation += notationSpecification.checkmate;
-      } else notation += notationSpecification.check;
-    }
-
-    if (move.enPassant) {
-      // move is an en passant
-      notation += " " + notationSpecification.enPassant;
-    }
+  if (move.enPassant) {
+    // move is an en passant
+    notation += " " + notationSpecification.enPassant;
   }
 
   let scroll = false;
@@ -186,12 +185,33 @@ function updateCaptures(piece, player, pieceStyle) {
   let parentEl = $(`.${player}__captures > .${piece}`)[0];
 
   let el = document.createElement("img");
-  el.src = `assets/pieces/${pieceStyle}/${player.substring(0, 1)}${piece}.png`;
+  el.src = `assets/pieces/${pieceStyle}/${
+    player === "white" ? "b" : "w"
+  }${piece}.png`;
   el.alt = piece;
   parentEl.appendChild(el);
 }
 
-function openPromotionPrompt() {}
+function openPromotionPrompt(player, spot) {
+  let promptEl = $(`.promotion-prompt__${player}`);
+
+  promptEl[0].classList.add("open");
+  let spotEl = $(
+    `.spot[data-rank='${spot.rank}'][data-file='${numToLetter(spot.file)}']`
+  )[0];
+
+  if (player === "white") {
+    promptEl.css("top", spotEl.getBoundingClientRect().top);
+  } else {
+    promptEl.css(
+      "top",
+      spotEl.getBoundingClientRect().bottom -
+        promptEl[0].getBoundingClientRect().height
+    );
+  }
+  promptEl.css("left", spotEl.getBoundingClientRect().left);
+  promptEl.css("width", spotEl.getBoundingClientRect().width);
+}
 
 function toggleModal(el) {
   let parentEl = el.parentElement;

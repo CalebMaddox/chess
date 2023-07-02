@@ -5,18 +5,11 @@ class Game {
       rankCount: startingPosition.length,
     };
 
-    this.history = [
-      { move: null, position: startingPosition, highlighted: [] },
-    ];
+    this.history = [{ move: null, position: startingPosition }];
 
-    this.position = startingPosition;
+    this.position = $.extend(true, [], startingPosition);
 
     this.currentPlayer = "white";
-
-    this.captures = {
-      white: [],
-      black: [],
-    };
 
     this.settings = {
       coordinates: false,
@@ -40,29 +33,30 @@ class Game {
     };
 
     this.state = {
-      // variables that are only temporary and should be CLEARED once a player's turn ends
       currentlyHighlighted: [],
       currentDots: [],
       selected: { file: null, rank: null },
       possibleMoves: [],
       enPassantSquare: { file: null, rank: null },
       paused: false,
-      promotionSquare: { file: null, rank: null },
+      pendingPromotion: {},
+      castlingPossibilities: {
+        white: { short: true, long: true },
+        black: { short: true, long: true },
+      },
     };
 
-    this.castlingPossibilities = {
-      // #region **explanation
-      // takes into consideration the following:
-      //  - if king has moved
-      //  - if rooks have moved
-      // the following must be checked elsewhere:
-      //  - if spaces between king and rook are empty
-      //  - if king isn't under check
-      //  - if spaces king would physically move through or to are attacked by opponent
-      // #endregion **explanation
-      white: { short: true, long: true },
-      black: { short: true, long: true },
+    this.counters = {
+      halfMovesSinceCaptureOrPawnMove: 0,
     };
+
+    this.startingPieces = [];
+
+    startingPosition.forEach((row) => {
+      row.forEach((piece) => {
+        if (piece) this.startingPieces.push(piece);
+      });
+    });
   }
 
   handlePageLoad() {
@@ -417,14 +411,14 @@ class Game {
 
               case "short castle":
                 specialProps.push("short castle");
-                if (!this.castlingPossibilities[player].short) {
+                if (!this.state.castlingPossibilities[player].short) {
                   possible = false;
                   failedFor = `failed condition: 'short castle'`;
                 }
                 break;
               case "long castle":
                 specialProps.push("long castle");
-                if (!this.castlingPossibilities[player].long) {
+                if (!this.state.castlingPossibilities[player].long) {
                   possible = false;
                   failedFor = `failed condition: 'long castle'`;
                 }
@@ -456,16 +450,17 @@ class Game {
             }
           });
         }
-      }
 
-      if (
-        piece.toLowerCase() === "p" &&
-        (to.rank === this.boardSize.rankCount || to.rank === 1)
-      ) {
-        specialProps.push("promotion");
+        if (
+          piece.toLowerCase() === "p" &&
+          (to.rank === this.boardSize.rankCount || to.rank === 1)
+        ) {
+          specialProps.push("promotion");
+        }
       }
 
       if (possible && !preventLooping) {
+        // checking if it puts friendly king in check
         if (piece.toLowerCase() === "k") {
           let kingPos = to;
 
@@ -480,6 +475,7 @@ class Game {
         } else {
           let kingPos = this.findPiece(player === "white" ? "K" : "k");
 
+          let replaceFrom = this.getPieceAt(from.file, from.rank);
           this.position[from.rank - 1][from.file - 1] = "";
           let replaceDestination = this.getPieceAt(to.file, to.rank);
           this.position[to.rank - 1][to.file - 1] = piece;
@@ -489,7 +485,7 @@ class Game {
             failedFor = "puts king in check";
           }
 
-          this.position[from.rank - 1][from.file - 1] = piece;
+          this.position[from.rank - 1][from.file - 1] = replaceFrom;
           this.position[to.rank - 1][to.file - 1] = replaceDestination;
         }
       }
@@ -507,7 +503,6 @@ class Game {
     let currentPlayer = this.currentPlayer;
 
     let movePiece = this.getPieceAt(from.file, from.rank);
-    let destinationPiece = this.getPieceAt(to.file, to.rank);
     this.position[from.rank - 1][from.file - 1] = "";
     this.position[to.rank - 1][to.file - 1] = movePiece;
 
@@ -530,6 +525,7 @@ class Game {
       to: to,
       check: false,
       checkmate: false,
+      stalemate: false,
       enPassant: false,
       promotion: { is: false, promoteTo: null },
     };
@@ -539,13 +535,6 @@ class Game {
         switch (property) {
           case "capture":
             moveSpecs.capture = true;
-            if (specialProps.includes("en passant")) break;
-            this.captures[currentPlayer].push(destinationPiece.toLowerCase());
-            updateCaptures(
-              destinationPiece.toLowerCase(),
-              currentPlayer,
-              this.settings.pieceStyle
-            );
             break;
 
           case "double advance":
@@ -562,12 +551,6 @@ class Game {
                 ? this.state.enPassantSquare.rank - 2
                 : this.state.enPassantSquare.rank
             ][this.state.enPassantSquare.file - 1] = "";
-            this.captures[currentPlayer].push(destinationPiece.toLowerCase());
-            updateCaptures(
-              destinationPiece.toLowerCase(),
-              currentPlayer,
-              this.settings.pieceStyle
-            );
             break;
 
           case "short castle":
@@ -584,40 +567,178 @@ class Game {
             break;
 
           case "disallow short castle":
-            this.castlingPossibilities[currentPlayer].short = false;
+            this.state.castlingPossibilities[currentPlayer].short = false;
             break;
           case "disallow long castle":
-            this.castlingPossibilities[currentPlayer].long = false;
+            this.state.castlingPossibilities[currentPlayer].long = false;
             break;
 
           case "promotion":
             moveSpecs.promotion.is = true;
             this.state.paused = true;
-            this.state.promotionSquare = to;
-            openPromotionPrompt();
+            openPromotionPrompt(currentPlayer, to);
             break;
         }
       });
+    }
+
+    if (movePiece.toLowerCase() !== "k" && movePiece.toLowerCase() !== "p") {
+      moveSpecs.disambiguity.necessary = this.checkDisambiguityNecessity(
+        movePiece,
+        to,
+        from
+      );
     }
 
     if (!specialProps.includes("double advance")) {
       this.state.enPassantSquare = { file: null, rank: null };
     }
 
+    if (movePiece.toLowerCase() === "p" || specialProps.includes("capture")) {
+      this.counters.halfMovesSinceCaptureOrPawnMove = 0;
+    } else {
+      this.counters.halfMovesSinceCaptureOrPawnMove++;
+    }
+
+    if (!this.state.paused) {
+      moveSpecs = this.checkCheckmateStalemate(currentPlayer, moveSpecs);
+
+      updateHistory(
+        moveSpecs,
+        this.settings.moveNotation,
+        this.history.length,
+        this.settings.scrollHistory
+      );
+      this.history.push({
+        move: moveSpecs,
+        position: $.extend(true, [], this.position),
+      });
+
+      this.displayCaptures();
+    } else {
+      this.state.pendingPromotion = moveSpecs;
+    }
+  }
+
+  promoteTo(piece) {
+    $(".promotion-prompt").removeClass("open");
+    let move = this.state.pendingPromotion;
+
+    move.promotion.promoteTo = piece;
+
+    this.position[move.to.rank - 1][move.to.file - 1] = piece;
+
+    move = this.checkCheckmateStalemate(move.player, move);
+
     updateHistory(
-      moveSpecs,
+      move,
       this.settings.moveNotation,
       this.history.length,
       this.settings.scrollHistory
     );
     this.history.push({
-      move: moveSpecs,
-      position: this.position,
-      highlighted: this.state.currentlyHighlighted,
+      move: move,
+      position: $.extend(true, [], this.position),
     });
+
+    display(this.position, this.settings.pieceStyle);
+    this.state.paused = false;
+    this.displayCaptures();
   }
 
   // #region utility
+
+  checkDisambiguityNecessity(piece, to, from) {
+    let opponentPiece;
+    if (isFriendly(piece, "white")) {
+      opponentPiece = piece.toLowerCase();
+    } else {
+      opponentPiece = piece.toUpperCase();
+    }
+
+    let moves = this.getPossibleMoves(to, opponentPiece, false, false);
+
+    let disambiguity = false;
+    let fileMatch = false;
+    let rankMatch = false;
+    moves.forEach((move) => {
+      if (this.getPieceAt(move.to.file, move.to.rank) === piece) {
+        disambiguity = true;
+        if (move.to.file === from.file) {
+          fileMatch = true;
+        }
+        if (move.to.rank === from.rank) {
+          rankMatch = true;
+        }
+      }
+    });
+
+    let res;
+
+    if (disambiguity) {
+      if (fileMatch) {
+        if (rankMatch) {
+          res = { file: true, rank: true };
+        } else {
+          res = { file: false, rank: true };
+        }
+      } else {
+        res = { file: true, rank: false };
+      }
+    } else {
+      res = { file: false, rank: false };
+    }
+
+    return res;
+  }
+
+  checkCheckmateStalemate(currentPlayer, moveSpecs) {
+    // checking if opponent has any moves
+    this.state.possibleMoves = [];
+    let hasPossibleMoves = false;
+    this.position.every((rank, rankNum) => {
+      rank.every((space, fileNum) => {
+        if (isFriendly(space, currentPlayer === "white" ? "black" : "white")) {
+          let moves = this.getPossibleMoves(
+            { file: fileNum + 1, rank: rankNum + 1 },
+            space,
+            false,
+            false
+          );
+          if (moves.length === 0) {
+            this.state.possibleMoves[`${fileNum + 1}${rankNum + 1}`] = moves;
+            return true;
+          } else {
+            this.state.possibleMoves[`${fileNum + 1}${rankNum + 1}`] = moves;
+            hasPossibleMoves = true;
+          }
+        } else {
+          return true;
+        }
+      });
+      if (!hasPossibleMoves) {
+        return true;
+      }
+    });
+
+    // checking if it puts opponent into check
+    let oppKingPos = this.findPiece(currentPlayer === "white" ? "k" : "K");
+    if (oppKingPos) {
+      moveSpecs.check = this.checkIfAttacked(
+        oppKingPos,
+        currentPlayer === "white" ? "black" : "white"
+      );
+    }
+    if (!hasPossibleMoves) {
+      if (moveSpecs.check) {
+        moveSpecs.checkmate = true;
+      } else {
+        moveSpecs.stalemate = true;
+      }
+    }
+
+    return moveSpecs;
+  }
 
   findPiece(piece) {
     let res;
@@ -686,7 +807,6 @@ class Game {
   clearState() {
     drawDots([], this.state.currentDots);
     this.state.selected = { file: null, rank: null };
-    this.state.possibleMoves = [];
     this.state.currentDots = [];
   }
 
@@ -797,10 +917,21 @@ class Game {
         break;
       case "pieceStyle":
         display(this.position, value);
+        this.displayCaptures();
+        let promotionImgs = document.querySelectorAll(
+          `.promotion-prompt__white img`
+        );
+        promotionImgs.forEach((promotionImg) => {
+          promotionImg.src = `assets/pieces/${value}/w${promotionImg.dataset.piece}.png`;
+        });
+        promotionImgs = document.querySelectorAll(
+          `.promotion-prompt__black img`
+        );
+        promotionImgs.forEach((promotionImg) => {
+          promotionImg.src = `assets/pieces/${value}/b${promotionImg.dataset.piece}.png`;
+        });
         break;
       case "moveNums":
-        // --move-num-opacity: 0;
-        // --history-hover-control
         if (value === "always") {
           body.css("--move-num-opacity", "1");
         } else if (value === "never") {
@@ -817,6 +948,110 @@ class Game {
         console.error(`unknown setting: ${setting} being set to ${value}`);
         break;
     }
+  }
+
+  displayCaptures() {
+    $(".captures > div > img").remove();
+
+    let startingPieces = this.startingPieces.map((e) => e);
+
+    this.position.forEach((row) => {
+      row.forEach((piece) => {
+        if (piece) {
+          let pieceAt = startingPieces.indexOf(piece);
+          if (pieceAt === -1) {
+            startingPieces.splice(
+              startingPieces.indexOf(piece.toLowerCase() === piece ? "p" : "P"),
+              1
+            );
+          } else {
+            startingPieces.splice(pieceAt, 1);
+          }
+        }
+      });
+    });
+
+    startingPieces.forEach((capture) => {
+      updateCaptures(
+        capture.toLowerCase(),
+        whichPlayer(capture) === "white" ? "black" : "white",
+        this.settings.pieceStyle
+      );
+    });
+  }
+
+  getFENNot() {
+    let fen = "";
+
+    // puts position into fen
+    for (i = 1; i <= this.position.length; i++) {
+      let row = this.position[this.position.length - i];
+
+      let emptySpotCount = 0;
+      row.forEach((spot) => {
+        if (spot === "") {
+          emptySpotCount++;
+        } else {
+          if (emptySpotCount > 0) {
+            fen += emptySpotCount.toString();
+            emptySpotCount = 0;
+          }
+          fen += spot;
+        }
+      });
+      if (emptySpotCount > 0) {
+        fen += emptySpotCount.toString();
+      }
+      if (i !== this.position.length) {
+        fen += "/";
+      }
+    }
+
+    // puts who's turn
+    if (this.currentPlayer === "white") {
+      fen += " w";
+    } else {
+      fen += " b";
+    }
+
+    // puts castling possibilities
+    fen += " ";
+    let anyCastlePoss = false;
+    if (this.state.castlingPossibilities.white.short) {
+      fen += "K";
+      anyCastlePoss = true;
+    }
+    if (this.state.castlingPossibilities.white.long) {
+      fen += "Q";
+      anyCastlePoss = true;
+    }
+    if (this.state.castlingPossibilities.black.short) {
+      fen += "k";
+      anyCastlePoss = true;
+    }
+    if (this.state.castlingPossibilities.black.long) {
+      fen += "q";
+      anyCastlePoss = true;
+    }
+    if (!anyCastlePoss) {
+      fen += "-";
+    }
+
+    // puts possible en passant
+    if (this.state.enPassantSquare.file) {
+      fen += ` ${numToLetter(this.state.enPassantSquare.file)}${
+        this.state.enPassantSquare.rank
+      }`;
+    } else {
+      fen += " -";
+    }
+
+    // puts halfMoves and fullMoves
+    fen += ` ${this.counters.halfMovesSinceCaptureOrPawnMove} ${Math.floor(
+      (this.history.length - 1) / 2
+    )}`;
+
+    return fen;
   }
 
   // #endregion // utility
@@ -838,6 +1073,19 @@ class Game {
     });
     this.position = this.history.at(-1).position;
     display(this.position, this.settings.pieceStyle);
+  }
+
+  undoMove() {
+    console.log("undo");
+  }
+  redoMove() {
+    console.log("redo");
+  }
+  resign() {
+    console.log("resign");
+  }
+  offerDraw() {
+    console.log("offer draw");
   }
 }
 

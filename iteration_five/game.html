@@ -16,13 +16,19 @@
     // Sets game type using url (would be set before redirecting to page from home screen)
     let urlParams = new URLSearchParams(window.location.search);
     let gameType = urlParams.get("gameType");
-    if (!gameType) {
+    let opponent = urlParams.get("opponent");
+    if (!gameTypeStartingPositions[gameType]) {
       urlParams.set("gameType", "classic");
+      window.location.search = urlParams.toString();
+    }
+    if (!buttonsForOpponents[opponent]) {
+      urlParams.set("opponent", "self");
       window.location.search = urlParams.toString();
     }
 
     // Initializes game based on url queries.
     let startingPosition = gameTypeStartingPositions[gameType];
+    let buttons = buttonsForOpponents[opponent];
 
     const game = new Game(startingPosition);
 
@@ -39,10 +45,10 @@
           spotEl.classList.add("spot");
           spotEl.dataset.rank = i;
           spotEl.dataset.file = numToLetter(j);
-          spotEl.addEventListener("click", function (e) {
+          spotEl.addEventListener("click", (e) => {
             game.spotClicked(e.target);
           });
-          spotEl.addEventListener("contextmenu", function (e) {
+          spotEl.addEventListener("contextmenu", (e) => {
             e.preventDefault();
             e.target.classList.toggle("highlighted");
           });
@@ -53,6 +59,15 @@
       }
 
       game.handlePageLoad();
+
+      let buttonEls = document.getElementsByClassName("game-control-button");
+
+      for (let i = 0; i < buttonEls.length; i++) {
+        buttonEls[i].innerText = buttons[i].text;
+        buttonEls[i].addEventListener("click", (e) => {
+          game[`${buttons[i].func}`]();
+        });
+      }
     });
   </script>
 
@@ -149,15 +164,6 @@
             <dl class="settings-list">
               <dt>Page</dt>
               <!-- #region Page -->
-              <dd>
-                <!-- Large Font -->
-                <div class="title">Large Font</div>
-                <div
-                  class="input toggle-input toggle-slider"
-                  onclick="game.toggleInput(this)"
-                  data-setting="fontSize"
-                  data-toggle="false"></div>
-              </dd>
               <dd>
                 <!-- Animations -->
                 <div class="title">Animations</div>
@@ -424,8 +430,8 @@
             </div>
           </div>
           <div class="game-controls">
-            <button onclick="game.resign()">Resign</button>
-            <button onclick="game.offerDraw()">Draw</button>
+            <button class="game-control-button"></button>
+            <button class="game-control-button"></button>
           </div>
         </div>
         <div class="player-info">
@@ -458,5 +464,65 @@
         </div>
       </div>
     </main>
+    <div class="promotion-prompt promotion-prompt__white">
+      <div onclick="game.promoteTo('Q')">
+        <img
+          draggable="false"
+          src="assets/pieces/neo/wq.png"
+          alt="Queen"
+          data-piece="q" />
+      </div>
+      <div onclick="game.promoteTo('R')">
+        <img
+          draggable="false"
+          src="assets/pieces/neo/wr.png"
+          alt="Rook"
+          data-piece="r" />
+      </div>
+      <div onclick="game.promoteTo('B')">
+        <img
+          draggable="false"
+          src="assets/pieces/neo/wb.png"
+          alt="Bishop"
+          data-piece="b" />
+      </div>
+      <div onclick="game.promoteTo('N')">
+        <img
+          draggable="false"
+          src="assets/pieces/neo/wn.png"
+          alt="Knight"
+          data-piece="n" />
+      </div>
+    </div>
+    <div class="promotion-prompt promotion-prompt__black">
+      <div onclick="game.promoteTo('q')">
+        <img
+          draggable="false"
+          src="assets/pieces/neo/bq.png"
+          alt="Queen"
+          data-piece="q" />
+      </div>
+      <div onclick="game.promoteTo('r')">
+        <img
+          draggable="false"
+          src="assets/pieces/neo/br.png"
+          alt="Rook"
+          data-piece="r" />
+      </div>
+      <div onclick="game.promoteTo('b')">
+        <img
+          draggable="false"
+          src="assets/pieces/neo/bb.png"
+          alt="Bishop"
+          data-piece="b" />
+      </div>
+      <div onclick="game.promoteTo('n')">
+        <img
+          draggable="false"
+          src="assets/pieces/neo/bn.png"
+          alt="Knight"
+          data-piece="n" />
+      </div>
+    </div>
   </body>
 </html>

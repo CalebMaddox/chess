@@ -1,0 +1,34 @@
+#header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  height: 6.25rem;
+}
+#header > div {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 1.5rem;
+}
+h1 {
+  font-size: 1.5rem;
+}
+.modal-control {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 1px solid #0000001a;
+  background-color: transparent;
+  display: grid;
+  place-items: center;
+  transition-property: background-color;
+}
+.modal-control:is(:hover, :focus) {
+  background-color: #e6f3f3;
+}
+.modal-control img {
+  width: 42%;
+  height: 42%;
+}

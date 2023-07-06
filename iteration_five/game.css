@@ -518,9 +518,7 @@ main {
 .spot > img {
   pointer-events: none;
   width: var(--piece-size);
-  aspect-ratio: 1;
   max-height: var(--piece-size);
-  user-select: none;
 }
 
 .row:first-child > .spot:first-child {

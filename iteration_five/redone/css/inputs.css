@@ -1,0 +1,69 @@
+input.custom-appearance {
+  display: none;
+}
+
+input[type="checkbox"]:checked + label {
+  cursor: pointer;
+  --input-bg: #17524f;
+  --input-bg-trans: #c5d4d3;
+}
+input[type="checkbox"]:not(:checked) + label {
+  cursor: pointer;
+  --input-bg: #9c9c9c;
+  --input-bg-trans: #d9d9d9;
+}
+input[type="checkbox"]:focus-within + label > .checkbox {
+  border: 1px solid black;
+}
+
+.checkbox {
+  position: relative;
+  width: 1.5rem;
+  height: 1.5rem;
+  background-color: var(--input-bg-trans);
+  transition: background-color 0.2s ease;
+  border-radius: 10%;
+}
+.checkbox::before,
+.checkbox::after {
+  content: "";
+  position: absolute;
+  width: 50%;
+  height: max(10%, 1px);
+  background-color: var(--input-bg);
+  transform-origin: 0 0;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 100vw;
+  rotate: -45deg;
+  transition-property: width, transform, border-radius;
+}
+.checkbox::after {
+  rotate: 45deg;
+}
+input[type="checkbox"]:checked + label .checkbox::before {
+  border-radius: 0 100vw 100vw 100vw;
+  transform: translate(-39%, 50%);
+}
+input[type="checkbox"]:checked + label .checkbox::after {
+  width: 25%;
+  border-radius: 100vw 0 100vw 100vw;
+  transform: translate(-50%, 100%);
+}
+
+.modal-item select {
+  border: 0;
+  outline: 0;
+  text-align: right;
+  margin-right: 0.25rem;
+  padding-right: 0.1rem;
+}
+.modal-item select > option {
+  background-color: transparent;
+}
+.modal-item select > option > .custom-option {
+  width: 100%;
+  height: 100%;
+  background-color: red;
+}

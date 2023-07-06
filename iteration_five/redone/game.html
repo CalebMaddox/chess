@@ -5,10 +5,188 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GloriChess</title>
     <link rel="icon" type="image/x-icon" href="../assets/icons/logo.svg" />
-    <link rel="stylesheet" href="game.css" />
+
+    <link rel="stylesheet" href="./css/style.css" />
+    <link rel="stylesheet" href="./css/header.css" />
+    <link rel="stylesheet" href="./css/game.css" />
+    <link rel="stylesheet" href="./css/board.css" />
+    <link rel="stylesheet" href="./css/arrows.css" />
+    <link rel="stylesheet" href="./css/sidebar.css" />
+    <link rel="stylesheet" href="./css/gameInfo.css" />
+    <link rel="stylesheet" href="./css/playerInfo.css" />
+    <link rel="stylesheet" href="./css/modal.css" />
+    <link rel="stylesheet" href="./css/inputs.css" />
+
+    <script src="./API/control.js"></script>
     <script src="../node_modules/jquery/dist/jquery.min.js"></script>
     <script src="Game.js"></script>
     <script src="createGame.js"></script>
+    <script src="handleUI.js"></script>
+    <script src="handleGame.js"></script>
   </head>
-  <body></body>
+  <body>
+    <header id="header">
+      <div>
+        <button
+          type="button"
+          class="modal-control"
+          onclick="openModal('navigation')">
+          <img src="assets/icons/hamburger.svg" alt="Nav" />
+        </button>
+        <h1 class="logo">Chess</h1>
+      </div>
+      <button
+        type="button"
+        class="modal-control"
+        onclick="openModal('settings')">
+        <img src="assets/icons/settings.svg" alt="Settings" />
+      </button> </header
+    ><noscript style="font-size: 2.5vw"
+      >This page requires JavaScript to run.</noscript
+    >
+    <main></main>
+
+    <!-- #region modals -->
+
+    <div
+      class="modal"
+      style="display: none"
+      id="navigation-modal"
+      data-open="false">
+      <nav class="modal-body">
+        <header class="modal-header">
+          <button
+            type="button"
+            class="modal-control"
+            onclick="closeModal('navigation')">
+            <img src="./assets/icons/close.svg" alt="X" />
+          </button>
+          <h2>Navigation</h2></header
+        >
+        <h3 class="section-header">Play</h3>
+        <a href="#playOnline" class="modal-item m__title-description"
+          ><div class="title"
+            ><img src="./assets/icons/online.svg" alt="" class="nav-img" /><span
+              >Online</span
+            ></div
+          >
+          <span class="description"
+            >Play a random opponent with a similar elo rating</span
+          >
+        </a>
+        <a href="#playBot" class="modal-item m__title-description"
+          ><div class="title"
+            ><img src="./assets/icons/bot.svg" alt="" class="nav-img" /><span
+              >Bot</span
+            ></div
+          >
+          <span class="description">Are you smarter than electricity?</span>
+        </a>
+        <a href="#playPuzzles" class="modal-item m__title-description"
+          ><div class="title"
+            ><img src="./assets/icons/puzzle.svg" alt="" class="nav-img" /><span
+              >Puzzles</span
+            ></div
+          >
+          <span class="description">Test your evaluation skills</span>
+        </a>
+        <a href="#playFriend" class="modal-item m__title-description"
+          ><div class="title"
+            ><img src="./assets/icons/friend.svg" alt="" class="nav-img" /><span
+              >Challenge a Friend</span
+            ></div
+          >
+          <span class="description">Duel it out!</span>
+        </a>
+        <h3 class="section-header">About Chess</h3>
+        <a href="#history" class="modal-item m__title-description"
+          ><div class="title"
+            ><img
+              src="./assets/icons/history.svg"
+              alt=""
+              class="nav-img" /><span>History of Chess</span></div
+          >
+          <span class="description">More interesting than it would seem!</span>
+        </a>
+        <a href="#howToPlay" class="modal-item m__title-description"
+          ><div class="title"
+            ><img
+              src="./assets/icons/playbook.svg"
+              alt=""
+              class="nav-img" /><span>How to Play</span></div
+          >
+          <span class="description">It's not all that difficult</span>
+        </a>
+      </nav>
+    </div>
+    <div
+      class="modal modal-right"
+      style="display: none"
+      id="settings-modal"
+      data-open="false">
+      <div class="modal-body">
+        <header class="modal-header"
+          ><h2>Settings</h2>
+          <button
+            type="button"
+            class="modal-control"
+            onclick="closeModal('settings')">
+            <img src="./assets/icons/close.svg" alt="X" />
+          </button>
+        </header>
+        <h3 class="section-header">Page</h3>
+        <div class="modal-item m__title-input-description">
+          <input
+            class="custom-appearance"
+            type="checkbox"
+            name="Animations"
+            id="animations" />
+          <label for="animations">
+            <div class="container">
+              <div class="title">Animations</div>
+              <div class="description">Hover, click, etc.</div>
+            </div>
+            <div aria-hidden="true" class="modal-input checkbox"></div>
+          </label>
+        </div>
+        <h3 class="section-header">Board</h3>
+        <div class="modal-item m__title-input-description">
+          <input
+            class="custom-appearance"
+            type="checkbox"
+            name="Coordinates"
+            id="coordinates" />
+          <label for="coordinates">
+            <div class="container">
+              <div class="title">Coordinates</div>
+              <div class="description">File and Rank Indication</div>
+            </div>
+            <div aria-hidden="true" class="modal-input checkbox"></div>
+          </label>
+        </div>
+        <div class="modal-item m__title-input">
+          <input
+            class="custom-appearance"
+            type="checkbox"
+            name="Larger Pieces"
+            id="largepieces" />
+          <label for="largepieces">
+            <div class="container">
+              <div class="title">Larger Pieces</div>
+            </div>
+            <div aria-hidden="true" class="modal-input checkbox"></div>
+          </label>
+        </div>
+        <div class="modal-item m__title-input">
+          <label for="piecestyle">
+            <div class="container">
+              <div class="title">Piece Style</div>
+            </div>
+            <select name="Piece Style" id="piecestyle"></select>
+          </label>
+        </div>
+      </div>
+    </div>
+    <!-- #endregion // modals -->
+  </body>
 </html>

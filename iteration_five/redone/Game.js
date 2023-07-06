@@ -1,12 +1,12 @@
 class Game {
-  constructor() {
+  constructor(whitePlayer, blackPlayer, gameID, elements) {
     this.gameInfo = {
-      whitePlayer: {
-        name: "White",
-        elo: 500,
-        playerID: 1,
-      },
+      whitePlayer: whitePlayer,
+      blackPlayer: blackPlayer,
+      gameID: gameID,
     };
+    this.elements = elements;
+    console.log(this.elements);
 
     this.history = [
       {

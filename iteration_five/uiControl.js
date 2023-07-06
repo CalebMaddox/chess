@@ -182,6 +182,8 @@ function updateHistory(move, notationSpecification, numMoves, scrollSetting) {
 }
 
 function updateCaptures(piece, player, pieceStyle) {
+  console.log(piece);
+
   let parentEl = $(`.${player}__captures > .${piece}`)[0];
 
   let el = document.createElement("img");

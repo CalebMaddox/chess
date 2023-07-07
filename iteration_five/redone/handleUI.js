@@ -1,10 +1,11 @@
 var windowSize;
-var arrows = [];
 var rightClickTarget = "";
 var loadingCont = true;
-var spotEls = [];
 var loadingAnimation;
 var currLoadAnim = 0;
+var arrows = [];
+var spotEls = [];
+var dropdowns = {};
 
 function initializeBoardHTML(whiteInfo, blackInfo) {
   window.addEventListener("resize", (e) => {
@@ -80,17 +81,17 @@ function initializeBoardHTML(whiteInfo, blackInfo) {
   movesWrapperEl.classList.add("history-wrapper");
 
   // #region TESTING
-  for (i = 0; i < 10; i++) {
-    let moveRow = document.createElement("div");
-    moveRow.classList.add("move-set");
-    moveRow.dataset.rowid = i + 1;
-    let move1 = document.createElement("span");
-    move1.innerText = randomMove();
-    let move2 = document.createElement("span");
-    move2.innerText = randomMove();
-    moveRow.append(move1, move2);
-    movesWrapperEl.appendChild(moveRow);
-  }
+  // for (i = 0; i < 10; i++) {
+  //   let moveRow = document.createElement("div");
+  //   moveRow.classList.add("move-set");
+  //   moveRow.dataset.rowid = i + 1;
+  //   let move1 = document.createElement("span");
+  //   move1.innerText = randomMove();
+  //   let move2 = document.createElement("span");
+  //   move2.innerText = randomMove();
+  //   moveRow.append(move1, move2);
+  //   movesWrapperEl.appendChild(moveRow);
+  // }
   // #endregion
 
   containerEl.appendChild(movesWrapperEl);
@@ -228,8 +229,48 @@ function initializeBoardHTML(whiteInfo, blackInfo) {
 
   // #endregion
 
-  // currLoadAnim = Math.floor(Math.random() * loadingArr.length);
-  // loading();
+  currLoadAnim = Math.floor(Math.random() * loadingArr.length);
+  // currLoadAnim = loadingArr.length - 1;
+  loading();
+
+  let dropdownEls = document.querySelectorAll(".dropdown");
+  dropdownEls.forEach((el) => {
+    el.addEventListener("click", (event) => {
+      let dropdown = event.target;
+      let optionList = document.querySelector(
+        `.option-list[data-setting='${dropdown.dataset.setting}']`
+      );
+      if (dropdown.dataset.open === "false") {
+        dropdown.dataset.open = "true";
+        let optionEls = optionList.querySelectorAll(".custom-option");
+        let selectedEl;
+        let cont = true;
+        optionEls.forEach((el) => {
+          if (cont) {
+            if (el.innerText === dropdown.innerText) {
+              selectedEl = el;
+              cont = false;
+            }
+          }
+        });
+        if (selectedEl) {
+          selectedEl.scrollIntoView({ block: "center" });
+          let selectedMiddle =
+            selectedEl.getBoundingClientRect().top +
+            selectedEl.getBoundingClientRect().height / 2;
+          let dropdownMiddle =
+            dropdown.getBoundingClientRect().top +
+            dropdown.getBoundingClientRect().height / 2;
+          if (Math.abs(selectedMiddle - dropdownMiddle) > 1) {
+            let top = parseInt(getComputedStyle(optionList).top);
+            let addToTop = (selectedMiddle - dropdownMiddle) * -1;
+            optionList.style.top = top + addToTop + "px";
+          }
+        }
+      } else dropdown.dataset.open = "false";
+    });
+    dropdowns[el.dataset.setting] = el;
+  });
 
   return {
     board: boardEl,
@@ -278,7 +319,7 @@ function playerModal(player) {
 }
 
 function spotClicked(el) {
-  if ((loadingCont = true)) {
+  if (loadingCont) {
     stopLoading();
   }
   removeHighlights();
@@ -518,6 +559,22 @@ function removeHighlights(only = "") {
   }
 }
 
+function setValue(setting, value) {
+  if (dropdowns[setting]) {
+    dropdowns[setting].innerText = value;
+    closeDropdown(setting);
+    return true;
+  } else return false;
+}
+function closeDropdown(setting) {
+  if (dropdowns[setting]) {
+    dropdowns[setting].dataset.open = "false";
+    return true;
+  } else {
+    return false;
+  }
+}
+
 // #region TESTING
 function randomMove() {
   var alphabet = "abcdefgh";
@@ -573,7 +630,6 @@ function makeArrows(
   if (toMax < 1) toMax = 1;
   if (toMax > 64) toMax = 64;
   if (toMin > toMax) toMin = toMax;
-  console.log(fromMin, fromMax, toMin, toMax);
   var timeBegan = new Date();
   var counter = 0;
   for (i = fromMin; i <= fromMax; i++) {
@@ -633,7 +689,8 @@ function createArrow(el1, el2) {
 }
 const loadingArr = [
   [
-    { remove: [], add: [49, 57, 58] },
+    // bottom left to top right
+    { delay: 160, remove: [], add: [49, 57, 58] },
     { remove: [], add: [41, 50, 59] },
     { remove: [], add: [33, 42, 51, 60] },
     { remove: [57], add: [25, 34, 43, 52, 61] },
@@ -653,7 +710,9 @@ const loadingArr = [
     { remove: [8], add: [] },
   ],
   [
+    // clear from middle
     {
+      delay: 390,
       remove: [],
       add: [
         1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
@@ -680,7 +739,8 @@ const loadingArr = [
     },
   ],
   [
-    { remove: [], add: [1, 2, 3, 4, 5, 6, 7, 8] },
+    // slide down
+    { delay: 268, remove: [], add: [1, 2, 3, 4, 5, 6, 7, 8] },
     { remove: [], add: [9, 10, 11, 12, 13, 14, 15, 16] },
     { remove: [], add: [17, 18, 19, 20, 21, 22, 23, 24] },
     { remove: [], add: [25, 26, 27, 28, 29, 30, 31, 32] },
@@ -689,9 +749,61 @@ const loadingArr = [
     { remove: [], add: [49, 50, 51, 52, 53, 54, 55, 56] },
     { remove: [], add: [57, 58, 59, 60, 61, 62, 63, 64] },
   ],
+  [
+    // spiral
+    { delay: 149, remove: [], add: [1, 9] },
+    { remove: [], add: [2, 10] },
+    { remove: [], add: [3, 11] },
+    { remove: [], add: [4, 12] },
+    { remove: [], add: [5, 13] },
+    { remove: [], add: [6, 7, 14] },
+    { remove: [], add: [8, 15] },
+    { remove: [], add: [16, 23, 24] },
+    { remove: [], add: [31, 32] },
+    { remove: [], add: [39, 40] },
+    { remove: [], add: [47, 48, 56] },
+    { remove: [], add: [55, 64] },
+    { remove: [], add: [54, 62, 63] },
+    { remove: [], add: [53, 61] },
+    { remove: [], add: [52, 60] },
+    { remove: [], add: [51, 58, 59] },
+    { remove: [], add: [50, 57] },
+    { remove: [], add: [41, 42, 49] },
+    { remove: [], add: [25, 33, 34] },
+    { remove: [], add: [17, 26] },
+    { remove: [], add: [18, 19, 27] },
+    { remove: [], add: [20, 21, 28] },
+    { remove: [], add: [22, 29] },
+    { remove: [], add: [30, 38] },
+    { remove: [], add: [37, 46] },
+    { remove: [], add: [44, 45] },
+    { remove: [], add: [35, 36, 43] },
+  ],
+  [
+    // fireworks
+    { delay: 146, remove: [], add: [61, 53] },
+    { remove: [], add: [] },
+    { remove: [], add: [52] },
+    { remove: [], add: [44] },
+    { remove: [61], add: [] },
+    { remove: [], add: [36] },
+    { remove: [], add: [] },
+    { remove: [53, 52], add: [29] },
+    { remove: [44, 36], add: [22, 21, 28, 37] },
+    { remove: [36, 29], add: [20, 35, 15, 13, 39] },
+    { remove: [21, 20, 28], add: [12, 24, 31] },
+    { remove: [22], add: [19, 26, 43, 47] },
+    { remove: [22, 37, 15], add: [18, 33, 50, 54] },
+    { remove: [24, 18, 31, 33], add: [] },
+    { remove: [13, 19, 26, 47, 39], add: [20] },
+    { remove: [12, 20, 35, 43, 54], add: [] },
+    { remove: [50], add: [37, 59] },
+    { remove: [37, 59], add: [] },
+  ],
 ];
 var loadingProgress = 0;
 function loading() {
+  loadingCont = true;
   loadingAnimation = setInterval(() => {
     if (loadingProgress >= loadingArr[currLoadAnim].length) {
       clearInterval(loadingAnimation);
@@ -706,20 +818,21 @@ function loading() {
       }, 500);
     } else {
       let obj = loadingArr[currLoadAnim][loadingProgress];
-      if (obj.remove)
+      if (obj.remove.length > 0)
         obj.remove.forEach((index) => {
           spotEls[index - 1].classList.remove("highlight");
         });
-      obj.add.forEach((index) => {
-        spotEls[index - 1].classList.add("highlight");
-      });
+      if (obj.add.length > 0)
+        obj.add.forEach((index) => {
+          spotEls[index - 1].classList.add("highlight");
+        });
       loadingProgress++;
     }
-  }, 770 - 230 * Math.E ** (0.0340403 * loadingArr[currLoadAnim].length));
+  }, loadingArr[currLoadAnim][0].delay);
 }
 function stopLoading() {
   clearInterval(loadingAnimation);
-  $(".spot").css("transition-duration", "200ms");
+  // $(".spot").css("transition-duration", "200ms");
   removeHighlights("normal");
   loadingCont = false;
 }

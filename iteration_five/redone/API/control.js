@@ -55,7 +55,7 @@ var gamesInfo = `[
 ]`;
 var playersInfo = `[
   {
-    "name": "Player 1 asdgvbaskuvasyda",
+    "name": "Player 1",
     "elo": 600,
     "pfp": "aaaa.jpg",
     "games": [{ "id": 0, "opponent": 1 }]

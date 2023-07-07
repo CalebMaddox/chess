@@ -47,13 +47,13 @@
     <main></main>
 
     <!-- #region modals -->
-
     <div
       class="modal"
       style="display: none"
       id="navigation-modal"
+      onclick="closeModal('navigation')"
       data-open="false">
-      <nav class="modal-body">
+      <nav class="modal-body" onclick="event.stopPropagation()">
         <header class="modal-header">
           <button
             type="button"
@@ -123,8 +123,9 @@
       class="modal modal-right"
       style="display: none"
       id="settings-modal"
+      onclick="closeModal('settings')"
       data-open="false">
-      <div class="modal-body">
+      <div class="modal-body" onclick="event.stopPropagation()">
         <header class="modal-header"
           ><h2>Settings</h2>
           <button
@@ -178,14 +179,55 @@
           </label>
         </div>
         <div class="modal-item m__title-input">
-          <label for="piecestyle">
+          <label>
             <div class="container">
               <div class="title">Piece Style</div>
             </div>
-            <select name="Piece Style" id="piecestyle"></select>
+            <div
+              data-open="false"
+              data-setting="piecestyle"
+              class="modal-input dropdown"
+              >Neo</div
+            >
+            <div
+              data-setting="piecestyle"
+              class="option-list"
+              onclick="closeDropdown(this.dataset.setting)">
+              <span
+                onclick="setValue(this.parentElement.dataset.setting, this.innerText)"
+                class="custom-option"
+                >Neo</span
+              >
+              <span
+                onclick="setValue(this.parentElement.dataset.setting, this.innerText)"
+                class="custom-option"
+                >Classic</span
+              >
+              <span
+                onclick="setValue(this.parentElement.dataset.setting, this.innerText)"
+                class="custom-option"
+                >Details</span
+              >
+              <span
+                onclick="setValue(this.parentElement.dataset.setting, this.innerText)"
+                class="custom-option"
+                >Bare</span
+              >
+              <span
+                onclick="setValue(this.parentElement.dataset.setting, this.innerText)"
+                class="custom-option"
+                >3D</span
+              >
+            </div>
           </label>
         </div>
       </div>
+    </div>
+
+    <!-- player modals -->
+
+    <div id="white-modal">
+      <div class="white-player-name"></div>
     </div>
     <!-- #endregion // modals -->
   </body>

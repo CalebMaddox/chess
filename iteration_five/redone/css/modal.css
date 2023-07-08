@@ -22,6 +22,7 @@
   width: var(--modal-width);
   background-color: var(--modal-bg);
   box-shadow: 0 0 5px #00000022;
+  overflow-y: auto;
   padding: 2rem;
   padding-top: 0;
 }
@@ -51,6 +52,34 @@
 }
 .modal-body .section-header:not(:first-of-type) {
   margin-top: 0.75rem;
+}
+.modal-body .section-subheader {
+  font-size: 1.1rem;
+  margin-top: 0.75rem;
+}
+.section-dropdown:hover {
+  cursor: pointer;
+}
+.section-dropdown::after {
+  content: "";
+  margin-left: 0.35rem;
+  display: inline-block;
+  width: 0.6rem;
+  aspect-ratio: 1;
+  background-image: url("../assets/icons/caret.svg");
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  transition-property: transform;
+}
+.section-dropdown.open::after {
+  transform: rotateX(180deg);
+}
+.section-dropdown + section {
+  display: none;
+}
+.section-dropdown.open + section {
+  display: block;
 }
 .modal-item {
   margin-inline: 0.25rem;
@@ -88,12 +117,12 @@
 .m__title-input > label {
   width: 100%;
   display: grid;
-  grid-template-columns: min(80%, calc(100% - 5rem)) max(20%, 5rem);
+  grid-template-columns: min(70%, calc(100% - 7.5rem)) max(30%, 7.5rem);
 }
 .m__title-input-description > label {
   width: 100%;
   display: grid;
-  grid-template-columns: min(80%, calc(100% - 5rem)) max(20%, 5rem);
+  grid-template-columns: min(70%, calc(100% - 7.5rem)) max(30%, 7.5rem);
 }
 .m__title-input-description > label > .description {
   display: flex;

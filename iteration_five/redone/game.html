@@ -7,15 +7,17 @@
     <link rel="icon" type="image/x-icon" href="../assets/icons/logo.svg" />
 
     <link rel="stylesheet" href="./css/style.css" />
-    <link rel="stylesheet" href="./css/header.css" />
-    <link rel="stylesheet" href="./css/game.css" />
-    <link rel="stylesheet" href="./css/board.css" />
-    <link rel="stylesheet" href="./css/arrows.css" />
-    <link rel="stylesheet" href="./css/sidebar.css" />
-    <link rel="stylesheet" href="./css/gameInfo.css" />
-    <link rel="stylesheet" href="./css/playerInfo.css" />
+    <!-- <link rel="stylesheet" href="./css/header.css" /> -->
+    <!-- <link rel="stylesheet" href="./css/game.css" /> -->
+    <!-- <link rel="stylesheet" href="./css/board.css" /> -->
+    <!-- <link rel="stylesheet" href="./css/arrows.css" /> -->
+    <!-- <link rel="stylesheet" href="./css/sidebar.css" /> -->
+    <!-- <link rel="stylesheet" href="./css/gameInfo.css" /> -->
+    <!-- <link rel="stylesheet" href="./css/playerInfo.css" /> -->
     <link rel="stylesheet" href="./css/modal.css" />
     <link rel="stylesheet" href="./css/inputs.css" />
+    <!-- v scss v -->
+    <link rel="stylesheet" href="styles.css" />
 
     <script src="./API/control.js"></script>
     <script src="../node_modules/jquery/dist/jquery.min.js"></script>
@@ -221,11 +223,163 @@
             </div>
           </label>
         </div>
+        <h3 class="section-header">History</h3>
+        <div class="modal-item m__title-input">
+          <label>
+            <div class="container">
+              <div class="title">Display Move Numbers</div>
+            </div>
+            <div
+              data-open="false"
+              data-setting="movenums"
+              class="modal-input dropdown"
+              >Always</div
+            >
+            <div
+              data-setting="movenums"
+              class="option-list"
+              onclick="closeDropdown(this.dataset.setting)">
+              <span
+                onclick="setValue(this.parentElement.dataset.setting, this.innerText)"
+                class="custom-option"
+                >Always</span
+              >
+              <span
+                onclick="setValue(this.parentElement.dataset.setting, this.innerText)"
+                class="custom-option"
+                >Never</span
+              >
+              <span
+                onclick="setValue(this.parentElement.dataset.setting, this.innerText)"
+                class="custom-option"
+                >On Hover</span
+              >
+            </div>
+          </label>
+        </div>
+        <div class="modal-item m__title-input-description">
+          <label>
+            <div class="container">
+              <div class="title">Scroll History</div>
+              <div class="description">After move, scroll into view</div>
+            </div>
+            <div
+              data-open="false"
+              data-setting="historyscroll"
+              class="modal-input dropdown"
+              >Near Bottom</div
+            >
+            <div
+              data-setting="historyscroll"
+              class="option-list"
+              onclick="closeDropdown(this.dataset.setting)">
+              <span
+                onclick="setValue(this.parentElement.dataset.setting, this.innerText)"
+                class="custom-option"
+                >Always</span
+              >
+              <span
+                onclick="setValue(this.parentElement.dataset.setting, this.innerText)"
+                class="custom-option"
+                >Never</span
+              >
+              <span
+                onclick="setValue(this.parentElement.dataset.setting, this.innerText)"
+                class="custom-option"
+                >Near Bottom</span
+              >
+            </div>
+          </label>
+        </div>
+        <h3
+          class="section-subheader section-dropdown"
+          onclick="this.classList.toggle('open')"
+          >Move Notation</h3
+        >
+        <section>
+          <div class="modal-item m__title-input-description">
+            <input
+              class="custom-appearance"
+              type="checkbox"
+              name="Disambiguity"
+              id="disambiguity" />
+            <label for="disambiguity">
+              <div class="container">
+                <div class="title">Force Disambiguity</div>
+                <div class="description"
+                  >Disambiguity specifies starting position</div
+                >
+              </div>
+              <div aria-hidden="true" class="modal-input checkbox"></div>
+            </label>
+          </div>
+          <div class="modal-item m__title-input-description">
+            <label for="promotion">
+              <div class="container">
+                <div class="title">Pawn Promotion</div>
+                <div class="description">Use the placeholder "PIECE"</div>
+              </div>
+              <input
+                type="text"
+                name="Promotion"
+                id="promotion"
+                class="modal-input custom-txt-input" />
+            </label>
+          </div>
+          <div class="modal-item m__title-input-description">
+            <label for="castling">
+              <div class="container">
+                <div class="title">Castling Uses</div>
+                <div class="description">Commonly O (letter) or 0 (number)</div>
+              </div>
+              <input
+                type="text"
+                name="Castling"
+                id="castling"
+                class="modal-input custom-txt-input" />
+            </label>
+          </div>
+          <div class="modal-item m__title-input">
+            <label for="enpassant">
+              <div class="container">
+                <div class="title">En Passant</div>
+              </div>
+              <input
+                type="text"
+                name="En Passant"
+                id="enpassant"
+                class="modal-input custom-txt-input" />
+            </label>
+          </div>
+          <div class="modal-item m__title-input">
+            <label for="check">
+              <div class="container">
+                <div class="title">Check</div>
+              </div>
+              <input
+                type="text"
+                name="Check"
+                id="check"
+                class="modal-input custom-txt-input" />
+            </label>
+          </div>
+          <div class="modal-item m__title-input">
+            <label for="checkmate">
+              <div class="container">
+                <div class="title">Checkmate</div>
+              </div>
+              <input
+                type="text"
+                name="Checkmate"
+                id="checkmate"
+                class="modal-input custom-txt-input" />
+            </label>
+          </div>
+        </section>
       </div>
     </div>
 
     <!-- player modals -->
-
     <div id="white-modal">
       <div class="white-player-name"></div>
     </div>

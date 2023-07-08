@@ -1,6 +1,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Geologica:wght@100..900&display=swap");
 
 :root {
+  --fw-200: 400;
   --fw-300: 500;
   --fw-400: 600;
   --fw-500: 700;

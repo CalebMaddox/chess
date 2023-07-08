@@ -231,11 +231,16 @@ function initializeBoardHTML(whiteInfo, blackInfo) {
 
   currLoadAnim = Math.floor(Math.random() * loadingArr.length);
   // currLoadAnim = loadingArr.length - 1;
-  loading();
+  // loading();
 
   let dropdownEls = document.querySelectorAll(".dropdown");
   dropdownEls.forEach((el) => {
     el.addEventListener("click", (event) => {
+      let allDropdowns = document.querySelectorAll(".dropdown");
+      allDropdowns.forEach((el) => {
+        el.dataset.open = "false";
+      });
+
       let dropdown = event.target;
       let optionList = document.querySelector(
         `.option-list[data-setting='${dropdown.dataset.setting}']`

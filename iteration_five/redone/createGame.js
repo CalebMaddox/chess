@@ -1,21 +1,14 @@
-function doubleDigit(string) {
-  string = string.toString();
-
-  return string.length >= 2 ? string : "0" + string;
-}
-function tripleDigit(string) {
-  string = string.toString();
-
-  if (string.length === 1) {
-    return "00" + string;
-  } else if (string.length === 2) {
-    return "0" + string;
+function createGame(player1, player2, whitePlayer) {
+  let whiteID;
+  let blackID;
+  if (whitePlayer === 1) {
+    whiteID = player1;
+    blackID = player2;
   } else {
-    return string;
+    whiteID = player2;
+    blackID = player1;
   }
-}
 
-function createGame(whiteID, blackID) {
   let playersPlayedRes = havePlayersPlayed(whiteID, blackID);
   const playersHavePlayed = playersPlayedRes.have;
   const playersPlayedCount = playersPlayedRes.times;
@@ -36,15 +29,6 @@ function createGame(whiteID, blackID) {
   let white = readFromAPI("playersInfo", whiteID);
   let black = readFromAPI("playersInfo", blackID);
 
-  let whiteInfo = {
-    name: white.name,
-    elo: white.elo,
-  };
-  let blackInfo = {
-    name: black.name,
-    elo: black.elo,
-  };
-
   const gameID = APIPush("gamesInfo", {
     whitePlayer: whiteID,
     blackPlayer: blackID,
@@ -55,12 +39,10 @@ function createGame(whiteID, blackID) {
     result: null,
   });
 
-  let elements = initializeBoardHTML(
-    { ...white, id: whiteID },
-    { ...black, id: blackID }
-  );
+  stopLoading();
+  initializePlayerInfo({ ...white, id: whiteID }, { ...black, id: blackID });
 
-  const game = new Game(whiteInfo, blackInfo, gameID, elements);
+  const game = new Game(gameID);
 
   return game;
 }

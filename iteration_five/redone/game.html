@@ -6,22 +6,13 @@
     <title>GloriChess</title>
     <link rel="icon" type="image/x-icon" href="../assets/icons/logo.svg" />
 
-    <link rel="stylesheet" href="./css/style.css" />
-    <!-- <link rel="stylesheet" href="./css/header.css" /> -->
-    <!-- <link rel="stylesheet" href="./css/game.css" /> -->
-    <!-- <link rel="stylesheet" href="./css/board.css" /> -->
-    <!-- <link rel="stylesheet" href="./css/arrows.css" /> -->
-    <!-- <link rel="stylesheet" href="./css/sidebar.css" /> -->
-    <!-- <link rel="stylesheet" href="./css/gameInfo.css" /> -->
-    <!-- <link rel="stylesheet" href="./css/playerInfo.css" /> -->
-    <link rel="stylesheet" href="./css/modal.css" />
-    <link rel="stylesheet" href="./css/inputs.css" />
-    <!-- v scss v -->
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="game.css" />
 
     <script src="./API/control.js"></script>
-    <script src="../node_modules/jquery/dist/jquery.min.js"></script>
+    <!-- <script src="../node_modules/jquery/dist/jquery.min.js"></script> -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
     <script src="Game.js"></script>
+    <script src="pieces.js"></script>
     <script src="createGame.js"></script>
     <script src="handleUI.js"></script>
     <script src="handleGame.js"></script>
@@ -29,118 +20,274 @@
   <body>
     <header id="header">
       <div>
-        <button
-          type="button"
-          class="modal-control"
-          onclick="openModal('navigation')">
+        <button type="button" class="modal-control" onclick="openModal('navigation')">
           <img src="assets/icons/hamburger.svg" alt="Nav" />
         </button>
         <h1 class="logo">Chess</h1>
       </div>
-      <button
-        type="button"
-        class="modal-control"
-        onclick="openModal('settings')">
+      <button type="button" class="modal-control" onclick="openModal('settings')">
         <img src="assets/icons/settings.svg" alt="Settings" />
-      </button> </header
-    ><noscript style="font-size: 2.5vw"
-      >This page requires JavaScript to run.</noscript
-    >
-    <main></main>
+      </button>
+    </header>
+    <noscript style="font-size: 2.5vw">This page requires JavaScript to run.</noscript>
+    <div class="iframe-container loginIframe"><iframe src="login.html" class="loginIframe" title="Login"></iframe></div>
+    <main>
+      <div id="board">
+        <section class="game-result">
+          <h2 class="ended-by"></h2>
+          <div><span class="player-name white-name"></span><span class="result white-result"></span></div>
+          <div><span class="player-name black-name"></span><span class="result black-result"></span></div>
+          <button type="button" onclick="copyPosition()">Copy Position (fen)</button>
+        </section>
+        <section aria-hidden="true" class="coords rank-coords left-coords">
+          <span>8</span><span>7</span><span>6</span><span>5</span><span>4</span><span>3</span><span>2</span><span>1</span>
+        </section>
+        <section aria-hidden="true" class="coords file-coords bottom-coords">
+          <span>a</span><span>b</span><span>c</span><span>d</span><span>e</span><span>f</span><span>g</span><span>h</span>
+        </section>
+        <div class="rank">
+          <div class="spot light" data-spotid="1"></div>
+          <div class="spot dark" data-spotid="2"></div>
+          <div class="spot light" data-spotid="3"></div>
+          <div class="spot dark" data-spotid="4"></div>
+          <div class="spot light" data-spotid="5"></div>
+          <div class="spot dark" data-spotid="6"></div>
+          <div class="spot light" data-spotid="7"></div>
+          <div class="spot dark" data-spotid="8"></div>
+        </div>
+        <div class="rank">
+          <div class="spot dark" data-spotid="9"></div>
+          <div class="spot light" data-spotid="10"></div>
+          <div class="spot dark" data-spotid="11"></div>
+          <div class="spot light" data-spotid="12"></div>
+          <div class="spot dark" data-spotid="13"></div>
+          <div class="spot light" data-spotid="14"></div>
+          <div class="spot dark" data-spotid="15"></div>
+          <div class="spot light" data-spotid="16"></div>
+        </div>
+        <div class="rank">
+          <div class="spot light" data-spotid="17"></div>
+          <div class="spot dark" data-spotid="18"></div>
+          <div class="spot light" data-spotid="19"></div>
+          <div class="spot dark" data-spotid="20"></div>
+          <div class="spot light" data-spotid="21"></div>
+          <div class="spot dark" data-spotid="22"></div>
+          <div class="spot light" data-spotid="23"></div>
+          <div class="spot dark" data-spotid="24"></div>
+        </div>
+        <div class="rank">
+          <div class="spot dark" data-spotid="25"></div>
+          <div class="spot light" data-spotid="26"></div>
+          <div class="spot dark" data-spotid="27"></div>
+          <div class="spot light" data-spotid="28"></div>
+          <div class="spot dark" data-spotid="29"></div>
+          <div class="spot light" data-spotid="30"></div>
+          <div class="spot dark" data-spotid="31"></div>
+          <div class="spot light" data-spotid="32"></div>
+        </div>
+        <div class="rank">
+          <div class="spot light" data-spotid="33"></div>
+          <div class="spot dark" data-spotid="34"></div>
+          <div class="spot light" data-spotid="35"></div>
+          <div class="spot dark" data-spotid="36"></div>
+          <div class="spot light" data-spotid="37"></div>
+          <div class="spot dark" data-spotid="38"></div>
+          <div class="spot light" data-spotid="39"></div>
+          <div class="spot dark" data-spotid="40"></div>
+        </div>
+        <div class="rank">
+          <div class="spot dark" data-spotid="41"></div>
+          <div class="spot light" data-spotid="42"></div>
+          <div class="spot dark" data-spotid="43"></div>
+          <div class="spot light" data-spotid="44"></div>
+          <div class="spot dark" data-spotid="45"></div>
+          <div class="spot light" data-spotid="46"></div>
+          <div class="spot dark" data-spotid="47"></div>
+          <div class="spot light" data-spotid="48"></div>
+        </div>
+        <div class="rank">
+          <div class="spot light" data-spotid="49"></div>
+          <div class="spot dark" data-spotid="50"></div>
+          <div class="spot light" data-spotid="51"></div>
+          <div class="spot dark" data-spotid="52"></div>
+          <div class="spot light" data-spotid="53"></div>
+          <div class="spot dark" data-spotid="54"></div>
+          <div class="spot light" data-spotid="55"></div>
+          <div class="spot dark" data-spotid="56"></div>
+        </div>
+        <div class="rank">
+          <div class="spot dark" data-spotid="57"></div>
+          <div class="spot light" data-spotid="58"></div>
+          <div class="spot dark" data-spotid="59"></div>
+          <div class="spot light" data-spotid="60"></div>
+          <div class="spot dark" data-spotid="61"></div>
+          <div class="spot light" data-spotid="62"></div>
+          <div class="spot dark" data-spotid="63"></div>
+          <div class="spot light" data-spotid="64"></div>
+        </div>
+      </div>
+      <aside id="sidebar">
+        <div id="game-info">
+          <div class="container">
+            <h2>History</h2>
+            <div class="header-row">
+              <h3>White</h3>
+              <h3>Black</h3>
+            </div>
+            <div class="history-wrapper"></div>
+          </div>
+          <div class="game-controls">
+            <button type="button" onclick="game.undoMove()">Undo</button>
+            <button type="button" onclick="game.redoMove()">Redo</button>
+          </div>
+        </div>
+        <div id="player-info">
+          <div class="default-view display">
+            <div id="black-info">
+              <div class="player-info-header">
+                <h3 class="player-name black-name" onclick="playerModal('black')">Black</h3>
+                <small class="player-elo black-elo">600</small>
+              </div>
+              <div class="captures">
+                <div class="piece-captures black-p"></div>
+                <div class="piece-captures black-b"></div>
+                <div class="piece-captures black-n"></div>
+                <div class="piece-captures black-r"></div>
+                <div class="piece-captures black-q"></div>
+              </div>
+            </div>
+            <div id="white-info">
+              <div class="player-info-header">
+                <h3 class="player-name white-name" onclick="playerModal('white')">White</h3>
+                <small class="player-elo white-elo">600</small>
+              </div>
+              <div class="captures">
+                <div class="piece-captures white-p"></div>
+                <div class="piece-captures white-b"></div>
+                <div class="piece-captures white-n"></div>
+                <div class="piece-captures white-r"></div>
+                <div class="piece-captures white-q"></div>
+              </div>
+            </div>
+          </div>
+          <div class="white-account-view player-account-view">
+            <div class="profile">
+              <div class="return-view" onclick="$('.white-account-view').removeClass('display'); $('.default-view').addClass('display')">
+                <img src="./assets/icons/caret.svg" style="rotate: 90deg; transform-origin: center" alt="" />
+              </div>
+              <div class="pfp">
+                <img class="white-pfp" src="./pfps/default.png" alt="" />
+                <div class="add-friend"></div>
+              </div>
+              <div class="basic-info">
+                <a class="player-name white-name redirect-white-acct">White</a>
+                <div class="rating">
+                  <small class="player-elo white-elo">600</small>
+                  <div class="medal white-medal"></div>
+                </div>
+              </div>
+            </div>
+            <div class="player-stats">
+              <section title="wins / draws / losses / win percentage" class="split-vertical game-stats">
+                <hr />
+                <span>overall</span><span class="wins">0</span><span class="draws">0</span><span class="losses">0</span
+                ><span class="win-perc">-%</span> <span>vs you</span><span class="wins">0</span><span class="draws">0</span
+                ><span class="losses">0</span><span class="win-perc">-%</span>
+              </section>
+              <section title="time control / elo" class="split-horizontal rating-stats">
+                <hr />
+                <span>&gt; 30</span>
+                <span>600</span><span>10-30</span><span>600</span><span>3-10</span><span>600</span><span>&lt; 3</span><span>600</span>
+              </section>
+            </div>
+          </div>
+          <div class="black-account-view player-account-view">
+            <div class="profile">
+              <div class="return-view" onclick="$('.black-account-view').removeClass('display'); $('.default-view').addClass('display')">
+                <img src="./assets/icons/caret.svg" style="rotate: 90deg; transform-origin: center" alt="" />
+              </div>
+              <div class="pfp">
+                <img class="black-pfp" src="./pfps/default.png" alt="" />
+                <div class="add-friend"></div>
+              </div>
+              <div class="basic-info">
+                <a class="player-name black-name redirect-black-acct">Black</a>
+                <div class="rating">
+                  <small class="player-elo black-elo">600</small>
+                  <div class="medal black-medal"></div>
+                </div>
+              </div>
+            </div>
+            <div class="player-stats">
+              <section title="wins / draws / losses / win percentage" class="split-vertical game-stats">
+                <hr />
+                <span>overall</span><span class="wins">0</span><span class="draws">0</span><span class="losses">0</span
+                ><span class="win-perc">-%</span> <span>vs you</span><span class="wins">0</span><span class="draws">0</span
+                ><span class="losses">0</span><span class="win-perc">-%</span>
+              </section>
+              <section title="time control / elo" class="split-horizontal rating-stats">
+                <hr />
+                <span>&gt; 30</span>
+                <span>600</span><span>10-30</span><span>600</span><span>3-10</span><span>600</span><span>&lt; 3</span><span>600</span>
+              </section>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </main>
 
     <!-- #region modals -->
-    <div
-      class="modal"
-      style="display: none"
-      id="navigation-modal"
-      onclick="closeModal('navigation')"
-      data-open="false">
-      <nav class="modal-body" onclick="event.stopPropagation()">
+    <div class="modal" style="display: none" id="navigation-modal" onclick="closeModal('navigation')" data-open="false">
+      <nav class="modal-body" onclick="modalBodyClick(event)">
         <header class="modal-header">
-          <button
-            type="button"
-            class="modal-control"
-            onclick="closeModal('navigation')">
+          <button type="button" class="modal-control" onclick="closeModal('navigation')">
             <img src="./assets/icons/close.svg" alt="X" />
           </button>
-          <h2>Navigation</h2></header
-        >
+          <h2>Navigation</h2>
+        </header>
         <h3 class="section-header">Play</h3>
         <a href="#playOnline" class="modal-item m__title-description"
-          ><div class="title"
-            ><img src="./assets/icons/online.svg" alt="" class="nav-img" /><span
-              >Online</span
-            ></div
-          >
-          <span class="description"
-            >Play a random opponent with a similar elo rating</span
-          >
+          ><div class="title"><img src="./assets/icons/online.svg" alt="" class="nav-img" /><span>Online</span></div>
+          <span class="description">Play a random opponent with a similar elo rating</span>
         </a>
         <a href="#playBot" class="modal-item m__title-description"
-          ><div class="title"
-            ><img src="./assets/icons/bot.svg" alt="" class="nav-img" /><span
-              >Bot</span
-            ></div
-          >
+          ><div class="title"><img src="./assets/icons/bot.svg" alt="" class="nav-img" /><span>Bot</span></div>
           <span class="description">Are you smarter than electricity?</span>
         </a>
         <a href="#playPuzzles" class="modal-item m__title-description"
-          ><div class="title"
-            ><img src="./assets/icons/puzzle.svg" alt="" class="nav-img" /><span
-              >Puzzles</span
-            ></div
-          >
+          ><div class="title"><img src="./assets/icons/puzzle.svg" alt="" class="nav-img" /><span>Puzzles</span></div>
           <span class="description">Test your evaluation skills</span>
         </a>
         <a href="#playFriend" class="modal-item m__title-description"
-          ><div class="title"
-            ><img src="./assets/icons/friend.svg" alt="" class="nav-img" /><span
-              >Challenge a Friend</span
-            ></div
-          >
+          ><div class="title"><img src="./assets/icons/friend.svg" alt="" class="nav-img" /><span>Challenge a Friend</span></div>
           <span class="description">Duel it out!</span>
         </a>
         <h3 class="section-header">About Chess</h3>
         <a href="#history" class="modal-item m__title-description"
-          ><div class="title"
-            ><img
-              src="./assets/icons/history.svg"
-              alt=""
-              class="nav-img" /><span>History of Chess</span></div
-          >
+          ><div class="title"><img src="./assets/icons/history.svg" alt="" class="nav-img" /><span>History of Chess</span></div>
           <span class="description">More interesting than it would seem!</span>
         </a>
         <a href="#howToPlay" class="modal-item m__title-description"
-          ><div class="title"
-            ><img
-              src="./assets/icons/playbook.svg"
-              alt=""
-              class="nav-img" /><span>How to Play</span></div
-          >
+          ><div class="title"><img src="./assets/icons/playbook.svg" alt="" class="nav-img" /><span>How to Play</span></div>
           <span class="description">It's not all that difficult</span>
         </a>
       </nav>
     </div>
-    <div
-      class="modal modal-right"
-      style="display: none"
-      id="settings-modal"
-      onclick="closeModal('settings')"
-      data-open="false">
-      <div class="modal-body" onclick="event.stopPropagation()">
-        <header class="modal-header"
-          ><h2>Settings</h2>
-          <button
-            type="button"
-            class="modal-control"
-            onclick="closeModal('settings')">
+
+    <div class="modal modal-right" style="display: none" id="settings-modal" onclick="closeModal('settings')" data-open="false">
+      <div class="modal-body" onclick="modalBodyClick(event)">
+        <header class="modal-header">
+          <h2>Settings</h2>
+          <button type="button" class="modal-control" onclick="closeModal('settings')">
             <img src="./assets/icons/close.svg" alt="X" />
           </button>
         </header>
         <h3 class="section-header">Page</h3>
         <div class="modal-item m__title-input-description">
           <input
-            class="custom-appearance"
+            checked
+            class="custom-appearance setting-input"
+            onchange="changeSetting(this.id, this.checked)"
             type="checkbox"
             name="Animations"
             id="animations" />
@@ -153,9 +300,25 @@
           </label>
         </div>
         <h3 class="section-header">Board</h3>
+        <div class="modal-item m__title-input">
+          <input
+            checked
+            class="custom-appearance setting-input"
+            onchange="changeSetting(this.id, this.checked)"
+            type="checkbox"
+            name="Flip Board"
+            id="flipboard" />
+          <label for="flipboard">
+            <div class="container">
+              <div class="title">Flip Board</div>
+            </div>
+            <div aria-hidden="true" class="modal-input checkbox"></div>
+          </label>
+        </div>
         <div class="modal-item m__title-input-description">
           <input
-            class="custom-appearance"
+            class="custom-appearance setting-input"
+            onchange="changeSetting(this.id, this.checked)"
             type="checkbox"
             name="Coordinates"
             id="coordinates" />
@@ -168,8 +331,23 @@
           </label>
         </div>
         <div class="modal-item m__title-input">
+          <label>
+            <div class="container">
+              <div class="title">Coordinate Positions</div>
+            </div>
+            <div data-open="false" data-setting="coordspos" class="modal-input dropdown setting-input">Left & Base</div>
+            <div data-setting="coordspos" class="option-list" onclick="closeDropdown(this.dataset.setting)">
+              <span onclick="setValue(this.parentElement.dataset.setting, this.innerText)" class="custom-option">Left & Base</span>
+              <span onclick="setValue(this.parentElement.dataset.setting, this.innerText)" class="custom-option">Left & Top</span>
+              <span onclick="setValue(this.parentElement.dataset.setting, this.innerText)" class="custom-option">Right & Base</span>
+              <span onclick="setValue(this.parentElement.dataset.setting, this.innerText)" class="custom-option">Right & Top</span>
+            </div>
+          </label>
+        </div>
+        <div class="modal-item m__title-input">
           <input
-            class="custom-appearance"
+            class="custom-appearance setting-input"
+            onchange="changeSetting(this.id, this.checked)"
             type="checkbox"
             name="Larger Pieces"
             id="largepieces" />
@@ -185,42 +363,29 @@
             <div class="container">
               <div class="title">Piece Style</div>
             </div>
-            <div
-              data-open="false"
-              data-setting="piecestyle"
-              class="modal-input dropdown"
-              >Neo</div
-            >
-            <div
-              data-setting="piecestyle"
-              class="option-list"
-              onclick="closeDropdown(this.dataset.setting)">
-              <span
-                onclick="setValue(this.parentElement.dataset.setting, this.innerText)"
-                class="custom-option"
-                >Neo</span
-              >
-              <span
-                onclick="setValue(this.parentElement.dataset.setting, this.innerText)"
-                class="custom-option"
-                >Classic</span
-              >
-              <span
-                onclick="setValue(this.parentElement.dataset.setting, this.innerText)"
-                class="custom-option"
-                >Details</span
-              >
-              <span
-                onclick="setValue(this.parentElement.dataset.setting, this.innerText)"
-                class="custom-option"
-                >Bare</span
-              >
-              <span
-                onclick="setValue(this.parentElement.dataset.setting, this.innerText)"
-                class="custom-option"
-                >3D</span
-              >
+            <div data-open="false" data-setting="piecestyle" class="modal-input dropdown setting-input">Neo</div>
+            <div data-setting="piecestyle" class="option-list" onclick="closeDropdown(this.dataset.setting)">
+              <span onclick="setValue(this.parentElement.dataset.setting, this.innerText)" class="custom-option">Neo</span>
+              <span onclick="setValue(this.parentElement.dataset.setting, this.innerText)" class="custom-option">Classic</span>
+              <span onclick="setValue(this.parentElement.dataset.setting, this.innerText)" class="custom-option">Details</span>
+              <span onclick="setValue(this.parentElement.dataset.setting, this.innerText)" class="custom-option">Bare</span>
+              <span onclick="setValue(this.parentElement.dataset.setting, this.innerText)" class="custom-option">3D</span>
             </div>
+          </label>
+        </div>
+        <div class="modal-item m__title-input">
+          <input
+            checked
+            class="custom-appearance setting-input"
+            onchange="changeSetting(this.id, this.checked)"
+            type="checkbox"
+            name="Display Possible Moves"
+            id="possiblemoves" />
+          <label for="possiblemoves">
+            <div class="container">
+              <div class="title">Display Possible Moves</div>
+            </div>
+            <div aria-hidden="true" class="modal-input checkbox"></div>
           </label>
         </div>
         <h3 class="section-header">History</h3>
@@ -229,31 +394,11 @@
             <div class="container">
               <div class="title">Display Move Numbers</div>
             </div>
-            <div
-              data-open="false"
-              data-setting="movenums"
-              class="modal-input dropdown"
-              >Always</div
-            >
-            <div
-              data-setting="movenums"
-              class="option-list"
-              onclick="closeDropdown(this.dataset.setting)">
-              <span
-                onclick="setValue(this.parentElement.dataset.setting, this.innerText)"
-                class="custom-option"
-                >Always</span
-              >
-              <span
-                onclick="setValue(this.parentElement.dataset.setting, this.innerText)"
-                class="custom-option"
-                >Never</span
-              >
-              <span
-                onclick="setValue(this.parentElement.dataset.setting, this.innerText)"
-                class="custom-option"
-                >On Hover</span
-              >
+            <div data-open="false" data-setting="movenums" class="modal-input dropdown setting-input">Always</div>
+            <div data-setting="movenums" class="option-list" onclick="closeDropdown(this.dataset.setting)">
+              <span onclick="setValue(this.parentElement.dataset.setting, this.innerText)" class="custom-option">Always</span>
+              <span onclick="setValue(this.parentElement.dataset.setting, this.innerText)" class="custom-option">Never</span>
+              <span onclick="setValue(this.parentElement.dataset.setting, this.innerText)" class="custom-option">On Hover</span>
             </div>
           </label>
         </div>
@@ -263,52 +408,42 @@
               <div class="title">Scroll History</div>
               <div class="description">After move, scroll into view</div>
             </div>
-            <div
-              data-open="false"
-              data-setting="historyscroll"
-              class="modal-input dropdown"
-              >Near Bottom</div
-            >
-            <div
-              data-setting="historyscroll"
-              class="option-list"
-              onclick="closeDropdown(this.dataset.setting)">
-              <span
-                onclick="setValue(this.parentElement.dataset.setting, this.innerText)"
-                class="custom-option"
-                >Always</span
-              >
-              <span
-                onclick="setValue(this.parentElement.dataset.setting, this.innerText)"
-                class="custom-option"
-                >Never</span
-              >
-              <span
-                onclick="setValue(this.parentElement.dataset.setting, this.innerText)"
-                class="custom-option"
-                >Near Bottom</span
-              >
+            <div data-open="false" data-setting="historyscroll" class="modal-input dropdown setting-input">Near Bottom</div>
+            <div data-setting="historyscroll" class="option-list" onclick="closeDropdown(this.dataset.setting)">
+              <span onclick="setValue(this.parentElement.dataset.setting, this.innerText)" class="custom-option">Always</span>
+              <span onclick="setValue(this.parentElement.dataset.setting, this.innerText)" class="custom-option">Never</span>
+              <span onclick="setValue(this.parentElement.dataset.setting, this.innerText)" class="custom-option">Near Bottom</span>
             </div>
           </label>
         </div>
-        <h3
-          class="section-subheader section-dropdown"
-          onclick="this.classList.toggle('open')"
-          >Move Notation</h3
-        >
+        <h3 class="section-subheader section-dropdown" onclick="this.classList.toggle('open')">Move Notation</h3>
         <section>
           <div class="modal-item m__title-input-description">
             <input
-              class="custom-appearance"
+              class="custom-appearance setting-input"
+              onchange="changeSetting(this.id, this.checked)"
               type="checkbox"
               name="Disambiguity"
               id="disambiguity" />
             <label for="disambiguity">
               <div class="container">
                 <div class="title">Force Disambiguity</div>
-                <div class="description"
-                  >Disambiguity specifies starting position</div
-                >
+                <div class="description">Disambiguity specifies starting position</div>
+              </div>
+              <div aria-hidden="true" class="modal-input checkbox"></div>
+            </label>
+          </div>
+          <div class="modal-item m__title-input-description">
+            <input
+              class="custom-appearance setting-input"
+              onchange="changeSetting(this.id, this.checked)"
+              type="checkbox"
+              name="Use Symbols"
+              id="usesymbols" />
+            <label for="usesymbols">
+              <div class="container">
+                <div class="title">Use Symbols</div>
+                <div class="description">Unicode symbols can be used in place of piece notations</div>
               </div>
               <div aria-hidden="true" class="modal-input checkbox"></div>
             </label>
@@ -320,10 +455,12 @@
                 <div class="description">Use the placeholder "PIECE"</div>
               </div>
               <input
+                onchange="changeSetting(this.id, this.value)"
                 type="text"
                 name="Promotion"
                 id="promotion"
-                class="modal-input custom-txt-input" />
+                value="/PIECE"
+                class="modal-input custom-txt-input setting-input" />
             </label>
           </div>
           <div class="modal-item m__title-input-description">
@@ -333,10 +470,12 @@
                 <div class="description">Commonly O (letter) or 0 (number)</div>
               </div>
               <input
+                onchange="changeSetting(this.id, this.value)"
                 type="text"
                 name="Castling"
                 id="castling"
-                class="modal-input custom-txt-input" />
+                value="0"
+                class="modal-input custom-txt-input setting-input" />
             </label>
           </div>
           <div class="modal-item m__title-input">
@@ -345,10 +484,12 @@
                 <div class="title">En Passant</div>
               </div>
               <input
+                onchange="changeSetting(this.id, this.value)"
                 type="text"
                 name="En Passant"
                 id="enpassant"
-                class="modal-input custom-txt-input" />
+                value="e.p."
+                class="modal-input custom-txt-input setting-input" />
             </label>
           </div>
           <div class="modal-item m__title-input">
@@ -357,10 +498,12 @@
                 <div class="title">Check</div>
               </div>
               <input
+                onchange="changeSetting(this.id, this.value)"
                 type="text"
                 name="Check"
                 id="check"
-                class="modal-input custom-txt-input" />
+                value="+"
+                class="modal-input custom-txt-input setting-input" />
             </label>
           </div>
           <div class="modal-item m__title-input">
@@ -369,20 +512,42 @@
                 <div class="title">Checkmate</div>
               </div>
               <input
+                onchange="changeSetting(this.id, this.value)"
                 type="text"
                 name="Checkmate"
                 id="checkmate"
-                class="modal-input custom-txt-input" />
+                value="#"
+                class="modal-input custom-txt-input setting-input" />
             </label>
           </div>
         </section>
+        <button class="account" onclick="toggleAccountSettings(event)"><img class="user-pfp" src="./pfps/default.png" alt="account" /></button>
+        <div class="account-settings" onclick="event.stopPropagation()">
+          <div class="user-name">User</div>
+          <button class="sign-out" onclick="signOut()">Sign Out</button>
+        </div>
       </div>
     </div>
 
-    <!-- player modals -->
-    <div id="white-modal">
-      <div class="white-player-name"></div>
+    <div class="white-promotion promotion">
+      <span onclick="game.promoteTo('Q')"><img src="assets/pieces/neo/wq.png" class="update-ps" alt="Queen" /></span
+      ><span onclick="game.promoteTo('R')"><img src="assets/pieces/neo/wr.png" class="update-ps" alt="Rook" /></span
+      ><span onclick="game.promoteTo('B')"><img src="assets/pieces/neo/wb.png" class="update-ps" alt="Bishop" /></span
+      ><span onclick="game.promoteTo('N')"><img src="assets/pieces/neo/wn.png" class="update-ps" alt="Knight" /></span>
+    </div>
+    <div class="black-promotion promotion">
+      <span onclick="game.promoteTo('q')"><img src="assets/pieces/neo/bq.png" class="update-ps" alt="Queen" /></span
+      ><span onclick="game.promoteTo('r')"><img src="assets/pieces/neo/br.png" class="update-ps" alt="Rook" /></span
+      ><span onclick="game.promoteTo('b')"><img src="assets/pieces/neo/bb.png" class="update-ps" alt="Bishop" /></span
+      ><span onclick="game.promoteTo('n')"><img src="assets/pieces/neo/bn.png" class="update-ps" alt="Knight" /></span>
     </div>
     <!-- #endregion // modals -->
+
+    <script>
+      // v login iframe uses to reload after success v
+      var doReload = function () {
+        location.reload();
+      };
+    </script>
   </body>
 </html>

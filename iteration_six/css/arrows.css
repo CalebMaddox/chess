@@ -1,0 +1,59 @@
+.arrow-body {
+  pointer-events: none;
+  position: absolute;
+  transform-origin: 0 center;
+  height: 12px;
+  background-color: var(--arrow-bg);
+  opacity: 0.8;
+  border-radius: 100vw;
+  transition-property: opacity;
+}
+.arrow-body::before {
+  content: "";
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 50px;
+  height: 50px;
+  background-image: url("../assets/icons/arrow-head.svg");
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.arrow-body.knights-horizontal {
+  transform: translateX(-6px);
+  border-radius: 0;
+}
+.arrow-body.knights-vertical {
+  transform: translateX(-6px);
+  border-radius: 0;
+}
+.arrow-body.flipped.knights-vertical {
+  transform: translateX(18px);
+}
+.arrow-body.flipped {
+  transform: translateX(16px);
+}
+.arrow-body.flipped::before {
+  left: 0;
+  transform: translate(50%, 50%);
+  rotate: 180deg;
+}
+.arrow-segment {
+  pointer-events: none;
+  position: absolute;
+  transform-origin: 0 center;
+  height: 12px;
+  background-color: var(--arrow-bg);
+  opacity: 0.8;
+  border-radius: 100vw 0 0 100vw;
+  transition-property: opacity;
+}
+.arrow-segment.flipped {
+  border-radius: 0 100vw 100vw 0;
+}
+.arrow-body.opacity,
+.arrow-segment.opacity {
+  opacity: 0;
+}

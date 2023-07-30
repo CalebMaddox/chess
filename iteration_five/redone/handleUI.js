@@ -51,16 +51,27 @@ $(document).ready(function () {
       if (!el) return;
       let range = leftClickTarget.range;
       if (range) {
-        if (!(e.clientX > range.xFrom && e.clientX < range.xTo && e.clientY > range.yFrom && e.clientY < range.yTo)) {
+        if (
+          !(
+            e.clientX > range.xFrom &&
+            e.clientX < range.xTo &&
+            e.clientY > range.yFrom &&
+            e.clientY < range.yTo
+          )
+        ) {
           leftClickTarget.range = {};
           el.style.transform = `translate(${leftClickTarget.offset.x}px, ${leftClickTarget.offset.y}px)`;
-          leftClickTarget.el.style.top = e.clientY - board.getBoundingClientRect().top + "px";
-          leftClickTarget.el.style.left = e.clientX - board.getBoundingClientRect().left + "px";
+          leftClickTarget.el.style.top =
+            e.clientY - board.getBoundingClientRect().top + "px";
+          leftClickTarget.el.style.left =
+            e.clientX - board.getBoundingClientRect().left + "px";
           leftClickTarget.el.style.position = "absolute";
         }
       } else {
-        leftClickTarget.el.style.top = e.clientY - board.getBoundingClientRect().top + "px";
-        leftClickTarget.el.style.left = e.clientX - board.getBoundingClientRect().left + "px";
+        leftClickTarget.el.style.top =
+          e.clientY - board.getBoundingClientRect().top + "px";
+        leftClickTarget.el.style.left =
+          e.clientX - board.getBoundingClientRect().left + "px";
       }
     }
   });
@@ -185,7 +196,9 @@ $(document).ready(function () {
       });
 
       let dropdown = event.target;
-      let optionList = document.querySelector(`.option-list[data-setting='${dropdown.dataset.setting}']`);
+      let optionList = document.querySelector(
+        `.option-list[data-setting='${dropdown.dataset.setting}']`
+      );
       if (dropdown.dataset.open === "false") {
         dropdown.dataset.open = "true";
         let optionEls = optionList.querySelectorAll(".custom-option");
@@ -205,11 +218,16 @@ $(document).ready(function () {
             top:
               (optionList.getBoundingClientRect().top +
                 optionList.getBoundingClientRect().height / 2 -
-                (selectedEl.getBoundingClientRect().top + selectedEl.getBoundingClientRect().height / 2)) *
+                (selectedEl.getBoundingClientRect().top +
+                  selectedEl.getBoundingClientRect().height / 2)) *
               -1,
           });
-          let selectedMiddle = selectedEl.getBoundingClientRect().top + selectedEl.getBoundingClientRect().height / 2;
-          let dropdownMiddle = dropdown.getBoundingClientRect().top + dropdown.getBoundingClientRect().height / 2;
+          let selectedMiddle =
+            selectedEl.getBoundingClientRect().top +
+            selectedEl.getBoundingClientRect().height / 2;
+          let dropdownMiddle =
+            dropdown.getBoundingClientRect().top +
+            dropdown.getBoundingClientRect().height / 2;
           if (Math.abs(selectedMiddle - dropdownMiddle) > 1) {
             let top = parseInt(getComputedStyle(optionList).top);
             let addToTop = (selectedMiddle - dropdownMiddle) * -1;
@@ -351,7 +369,9 @@ function handleDragPiece(event) {
     }
     el.classList.add("highlight");
     possible.forEach((spot) => {
-      $(`.spot[data-spotid='${coordsToIndex(spot.rank, spot.file) + 1}']`).addClass("dot");
+      $(
+        `.spot[data-spotid='${coordsToIndex(spot.rank, spot.file) + 1}']`
+      ).addClass("dot");
     });
     selected = el;
 
@@ -370,9 +390,18 @@ function handleDragPiece(event) {
       yOffset = yOffset + (event.clientY - (imgY + imgHeight / 2)) / 2;
 
       let elRect = el.getBoundingClientRect();
-      let elRange = { xFrom: elRect.left, xTo: elRect.right, yFrom: elRect.top, yTo: elRect.bottom };
+      let elRange = {
+        xFrom: elRect.left,
+        xTo: elRect.right,
+        yFrom: elRect.top,
+        yTo: elRect.bottom,
+      };
 
-      leftClickTarget = { el: img, offset: { x: xOffset, y: yOffset }, range: elRange };
+      leftClickTarget = {
+        el: img,
+        offset: { x: xOffset, y: yOffset },
+        range: elRange,
+      };
     }
   } else {
     leftClickTarget = { el: null };
@@ -385,7 +414,10 @@ function spotClicked(el) {
   }
   if (selected) {
     if (el !== selected) {
-      game.attemptMove(parseInt(selected.dataset.spotid) - 1, parseInt(el.dataset.spotid) - 1);
+      game.attemptMove(
+        parseInt(selected.dataset.spotid) - 1,
+        parseInt(el.dataset.spotid) - 1
+      );
       selected.classList.remove("highlight");
       $(".dot").removeClass("dot");
       selected = undefined;
@@ -410,7 +442,10 @@ function handleContextMenu(e) {
     if (rightClickTarget === "") return;
     let cont = true;
     arrows.every((currentArrow, index) => {
-      if (currentArrow.from === rightClickTarget.dataset.spotid && currentArrow.to === e.target.dataset.spotid) {
+      if (
+        currentArrow.from === rightClickTarget.dataset.spotid &&
+        currentArrow.to === e.target.dataset.spotid
+      ) {
         arrows[index].el.forEach((el) => {
           el.remove();
         });
@@ -433,12 +468,18 @@ async function handlePageResize(windowRef) {
   if (
     currWindowSize.height === window.innerHeight &&
     currWindowSize.width === window.innerWidth &&
-    !(windowSize.height === window.innerHeight && windowSize.width === window.innerWidth)
+    !(
+      windowSize.height === window.innerHeight &&
+      windowSize.width === window.innerWidth
+    )
   ) {
     // arrows
     let tempArrows = removeArrows();
     tempArrows.forEach((arrow) => {
-      createArrow($(`.spot[data-spotid=${arrow.from}]`)[0], $(`.spot[data-spotid=${arrow.to}]`)[0]);
+      createArrow(
+        $(`.spot[data-spotid=${arrow.from}]`)[0],
+        $(`.spot[data-spotid=${arrow.to}]`)[0]
+      );
     });
     windowSize = currWindowSize;
   }
@@ -468,8 +509,10 @@ function createArrowEl(fromEl, toEl) {
   let width = fromRect.width;
 
   if (
-    (Math.abs(yDiff - height * 2) < height / 2 && Math.abs(xDiff - width) < width / 2) ||
-    (Math.abs(yDiff - height) < height / 2 && Math.abs(xDiff - width * 2) < width / 2)
+    (Math.abs(yDiff - height * 2) < height / 2 &&
+      Math.abs(xDiff - width) < width / 2) ||
+    (Math.abs(yDiff - height) < height / 2 &&
+      Math.abs(xDiff - width * 2) < width / 2)
   ) {
     knightsMove = true;
     // #region knight's moves
@@ -579,7 +622,8 @@ function switchHighlight(el, specialCase) {
   switch (specialCase) {
     case "normal":
       el.classList.toggle("highlight");
-      if (el.classList.contains("dark-highlight")) el.classList.remove("dark-highlight");
+      if (el.classList.contains("dark-highlight"))
+        el.classList.remove("dark-highlight");
       break;
     case "shift":
       el.classList.toggle("dark-highlight");
@@ -607,7 +651,10 @@ function removeHighlights(only = "") {
       }
       break;
     default:
-      highlights = [...document.querySelectorAll(".spot.highlight"), ...document.querySelectorAll(".spot.dark-highlight")];
+      highlights = [
+        ...document.querySelectorAll(".spot.highlight"),
+        ...document.querySelectorAll(".spot.dark-highlight"),
+      ];
       if (highlights.length > 0) {
         highlights.forEach((tempEl) => {
           tempEl.classList.remove("highlight", "dark-highlight");
@@ -773,17 +820,34 @@ function randomMove() {
         (Math.round(Math.random() * 7) + 1);
     } else {
       if (Math.random() < 0.5) {
-        res += alphabet[Math.round(Math.random() * 7)] + alphabet[Math.round(Math.random() * 7)] + (Math.round(Math.random() * 7) + 1);
+        res +=
+          alphabet[Math.round(Math.random() * 7)] +
+          alphabet[Math.round(Math.random() * 7)] +
+          (Math.round(Math.random() * 7) + 1);
       } else {
-        res += Math.round(Math.random() * 7) + 1 + alphabet[Math.round(Math.random() * 7)] + (Math.round(Math.random() * 7) + 1);
+        res +=
+          Math.round(Math.random() * 7) +
+          1 +
+          alphabet[Math.round(Math.random() * 7)] +
+          (Math.round(Math.random() * 7) + 1);
       }
     }
   } else {
-    res += alphabet[Math.round(Math.random() * 7)] + (Math.round(Math.random() * 7) + 1);
+    res +=
+      alphabet[Math.round(Math.random() * 7)] +
+      (Math.round(Math.random() * 7) + 1);
   }
   return res;
 }
-function makeArrows(fromMin = 1, fromMax = 64, toMin = 1, toMax = 64, only = "both", clearAfter = true, timeControl = 5) {
+function makeArrows(
+  fromMin = 1,
+  fromMax = 64,
+  toMin = 1,
+  toMax = 64,
+  only = "both",
+  clearAfter = true,
+  timeControl = 5
+) {
   if (fromMin < 1) fromMin = 1;
   if (fromMin > 64) fromMin = 64;
   if (fromMax < 1) fromMax = 1;
@@ -800,8 +864,10 @@ function makeArrows(fromMin = 1, fromMax = 64, toMin = 1, toMax = 64, only = "bo
     for (j = toMin; j <= toMax; j++) {
       let cont = true;
       let isLast = false;
-      if ((only === "forwards" && i >= j) || (only === "backwards" && i <= j)) cont = false;
-      if (((only === "backwards" && i - 1 === j) || j === toMax) && clearAfter) isLast = true;
+      if ((only === "forwards" && i >= j) || (only === "backwards" && i <= j))
+        cont = false;
+      if (((only === "backwards" && i - 1 === j) || j === toMax) && clearAfter)
+        isLast = true;
       if (i !== j && cont) {
         let el1 = $(`.spot[data-spotid=${i}]`)[0];
         let el2 = $(`.spot[data-spotid=${j}]`)[0];
@@ -827,10 +893,18 @@ function makeArrows(fromMin = 1, fromMax = 64, toMin = 1, toMax = 64, only = "bo
     let timeShouldTake = (counter * timeControl) / 1000;
     let timeDidTake = (timeNow - timeBegan - 20) / 1000;
     let diff = Math.round((timeDidTake - timeShouldTake) * 1000) / 1000;
-    console.log("operation took " + timeDidTake + " second(s); took " + diff + " second(s) longer than expected.");
+    console.log(
+      "operation took " +
+        timeDidTake +
+        " second(s); took " +
+        diff +
+        " second(s) longer than expected."
+    );
     if (clearAfter) removeArrows();
   }, counter * timeControl + 20);
-  return "operation should take " + (counter * timeControl) / 1000 + " second(s).";
+  return (
+    "operation should take " + (counter * timeControl) / 1000 + " second(s)."
+  );
 }
 function createArrow(el1, el2) {
   let arrowBody = createArrowEl(el1, el2);
@@ -869,18 +943,26 @@ const loadingArr = [
       delay: 390,
       remove: [],
       add: [
-        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38,
-        39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64,
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+        21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38,
+        39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56,
+        57, 58, 59, 60, 61, 62, 63, 64,
       ],
     },
     { remove: [28, 29, 36, 37], add: [] },
     { remove: [19, 20, 21, 22, 27, 30, 35, 38, 43, 44, 45, 46], add: [] },
     {
-      remove: [10, 11, 12, 13, 14, 15, 18, 23, 26, 31, 34, 39, 42, 47, 50, 51, 52, 53, 54, 55],
+      remove: [
+        10, 11, 12, 13, 14, 15, 18, 23, 26, 31, 34, 39, 42, 47, 50, 51, 52, 53,
+        54, 55,
+      ],
       add: [],
     },
     {
-      remove: [1, 2, 3, 4, 5, 6, 7, 8, 9, 16, 17, 24, 25, 32, 33, 40, 41, 48, 49, 56, 57, 58, 59, 60, 61, 62, 63, 64],
+      remove: [
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 16, 17, 24, 25, 32, 33, 40, 41, 48, 49, 56,
+        57, 58, 59, 60, 61, 62, 63, 64,
+      ],
       add: [],
     },
   ],
@@ -1086,7 +1168,9 @@ function updateCaptures(whiteMissing, blackMissing) {
     }
     if (value > 0 && number !== value) {
       for (i = 0; i < value - number; i++) {
-        parent.innerHTML += `<img class="update-ps" src="assets/pieces/${userSettings.piecestyle ?? defaultSettings.piecestyle}/b${key}.png" />`;
+        parent.innerHTML += `<img class="update-ps" src="assets/pieces/${
+          userSettings.piecestyle ?? defaultSettings.piecestyle
+        }/b${key}.png" />`;
       }
     }
   }
@@ -1109,21 +1193,36 @@ function updateCaptures(whiteMissing, blackMissing) {
     }
     if (value > 0 && number !== value) {
       for (i = 0; i < value - number; i++) {
-        parent.innerHTML += `<img class="update-ps" src="assets/pieces/${userSettings.piecestyle ?? defaultSettings.piecestyle}/w${key}.png" />`;
+        parent.innerHTML += `<img class="update-ps" src="assets/pieces/${
+          userSettings.piecestyle ?? defaultSettings.piecestyle
+        }/w${key}.png" />`;
       }
     }
   }
 }
-const unicodeForPieces = { wn: "♘", wb: "♗", wr: "♖", wq: "♕", wk: "♔", bn: "♞", bb: "♝", br: "♜", bq: "♛", bk: "♚" };
+const unicodeForPieces = {
+  wn: "♘",
+  wb: "♗",
+  wr: "♖",
+  wq: "♕",
+  wk: "♔",
+  bn: "♞",
+  bb: "♝",
+  br: "♜",
+  bq: "♛",
+  bk: "♚",
+};
 function updateHistory(move) {
   let not = "";
 
   if (move.special === "short castle") {
-    not = `${userSettings.castling ?? defaultSettings.castling}-${userSettings.castling ?? defaultSettings.castling}`;
-  } else if (move.special === "long castle") {
-    not = `${userSettings.castling ?? defaultSettings.castling}-${userSettings.castling ?? defaultSettings.castling}-${
+    not = `${userSettings.castling ?? defaultSettings.castling}-${
       userSettings.castling ?? defaultSettings.castling
     }`;
+  } else if (move.special === "long castle") {
+    not = `${userSettings.castling ?? defaultSettings.castling}-${
+      userSettings.castling ?? defaultSettings.castling
+    }-${userSettings.castling ?? defaultSettings.castling}`;
   } else {
     move.piece = move.piece.toUpperCase();
     if (move.piece !== "P") {
@@ -1132,7 +1231,8 @@ function updateHistory(move) {
         not += unicodeForPieces[`${playerNot}${move.piece.toLowerCase()}`];
       } else not += move.piece;
     }
-    let userDisambiguity = userSettings.disambiguity ?? defaultSettings.disambiguity;
+    let userDisambiguity =
+      userSettings.disambiguity ?? defaultSettings.disambiguity;
     if (move.disambiguity.file || userDisambiguity) {
       not += fileLetter(move.from.file);
     }
@@ -1148,10 +1248,14 @@ function updateHistory(move) {
       not += " " + (userSettings.enpassant ?? defaultSettings.enpassant);
     }
     if (move.special === "promotion") {
-      not += (userSettings.promotion ?? defaultSettings.promotion).replace("PIECE", move.promoteTo.toUpperCase());
+      not += (userSettings.promotion ?? defaultSettings.promotion).replace(
+        "PIECE",
+        move.promoteTo.toUpperCase()
+      );
     }
     if (move.check) {
-      if (move.checkmate) not += userSettings.checkmate ?? defaultSettings.checkmate;
+      if (move.checkmate)
+        not += userSettings.checkmate ?? defaultSettings.checkmate;
       else not += userSettings.check ?? defaultSettings.check;
     }
   }
@@ -1160,7 +1264,10 @@ function updateHistory(move) {
   let el = document.createElement("span");
   let parent;
   el.innerText = not;
-  if (grand.children.length > 0 && grand.children[grand.children.length - 1].children.length !== 2) {
+  if (
+    grand.children.length > 0 &&
+    grand.children[grand.children.length - 1].children.length !== 2
+  ) {
     parent = grand.children[grand.children.length - 1];
     parent.appendChild(el);
   } else {
@@ -1185,7 +1292,14 @@ function updateHistory(move) {
       grand.scroll({ top: grand.scrollHeight, behavior: "smooth" });
       break;
     case "Near Bottom":
-      if (Math.abs(grand.scrollHeight - grand.getBoundingClientRect().height - grand.scrollTop) < parent.getBoundingClientRect().height * 1.5) {
+      if (
+        Math.abs(
+          grand.scrollHeight -
+            grand.getBoundingClientRect().height -
+            grand.scrollTop
+        ) <
+        parent.getBoundingClientRect().height * 1.5
+      ) {
         grand.scroll({ top: grand.scrollHeight, behavior: "smooth" });
       }
       break;
